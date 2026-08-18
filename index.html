@@ -593,6 +593,20 @@ input[type=date]::-webkit-calendar-picker-indicator{filter:invert(.5)}
     </div>
   </div>
 </div>
+<!-- MODAL microgerenciamento -->
+<div class="modal-overlay" id="micro-modal">
+  <div class="modal">
+    <h2 id="micro-modal-title">Editar</h2>
+    <div class="field-row"><label>Tempo falado (min, acumulado no dia)</label><input type="number" id="micro-hf" min="0"></div>
+    <div class="field-row"><label>Ligações (acumulado no dia)</label><input type="number" id="micro-lig" min="0"></div>
+    <div class="field-row"><label>Tempo conectado (min, acumulado no dia)</label><input type="number" id="micro-con" min="0"></div>
+    <div class="modal-btns">
+      <button class="modal-cancel" onclick="fecharMicroModal()">Cancelar</button>
+      <button class="modal-confirm" onclick="salvarMicroCelula()">Salvar</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -1304,6 +1318,7 @@ const TEAM_TABS_DEF = [
   {id:'vendors', label:'Vendedores'},
   {id:'grupos', label:'Grupos'},
   {id:'relatorio', label:'Relatório'},
+  {id:'micro', label:'Micro'},
 ];
 let teamTab = 'st-vd';
 
@@ -1325,6 +1340,121 @@ async function setTeamTab(tab, el) {
   else if (tab==='vendors') await renderVendors(body);
   else if (tab==='grupos') await renderGrupos(body);
   else if (tab==='relatorio') await renderRelatorio(body);
+  else if (tab==='micro') await renderMicro(body);
+}
+
+// ── MICROGERENCIAMENTO — quadro de hora em hora ─────────
+let microHoras = [];
+let microData = {};
+let microEditando = null;
+
+async function renderMicro(body) {
+  body.innerHTML = `
+    <div class="admin-box">
+      <div class="admin-box-title">Microgerenciamento — hora em hora</div>
+      <div style="display:flex;gap:8px;margin-bottom:10px;align-items:flex-end">
+        <div style="flex:1">
+          <label style="font-size:10px;color:var(--text3);font-weight:700;display:block;margin-bottom:4px">DATA</label>
+          <input type="date" id="micro-data" value="${todayISO()}" style="width:100%;border:1.5px solid var(--border);border-radius:8px;padding:9px 11px;font-size:13px;color:var(--text);background:var(--bg3);outline:none" onchange="carregarMicro()">
+        </div>
+      </div>
+      <div style="display:flex;gap:12px;margin-bottom:10px;font-size:11px;color:var(--text2)">
+        <span>🟢 evoluindo</span><span>🟠 parado</span><span>🔵 1ª hora</span><span>⚪ sem dado</span>
+      </div>
+      <div id="micro-loading" style="display:none;text-align:center;padding:1rem;color:var(--text3);font-size:13px">Carregando...</div>
+      <div id="micro-grid-wrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch"></div>
+    </div>`;
+  await carregarMicro();
+}
+
+async function carregarMicro() {
+  const dataISO = document.getElementById('micro-data')?.value;
+  if (!dataISO) return;
+  document.getElementById('micro-loading').style.display = 'block';
+  document.getElementById('micro-grid-wrap').innerHTML = '';
+  try {
+    const r = await api(`/api/micro?team=${TEAM_ID}&data=${dataISO}`, { headers: ah() });
+    microHoras = r.horas || [];
+    microData  = r.dados || {};
+    renderMicroGrid();
+  } catch(e) { showToast('Erro: '+e.message,'toast-erro'); }
+  document.getElementById('micro-loading').style.display = 'none';
+}
+
+function statusMicro(code, horaIdx) {
+  const hora  = microHoras[horaIdx];
+  const atual = microData[hora]?.[code];
+  if (!atual) return { status: 'vazio', atual: null };
+  for (let i = horaIdx - 1; i >= 0; i--) {
+    const prev = microData[microHoras[i]]?.[code];
+    if (prev) {
+      const evoluiu = atual.hf > prev.hf || atual.ligacoes > prev.ligacoes || atual.conectado > prev.conectado;
+      return { status: evoluiu ? 'evoluindo' : 'parado', atual };
+    }
+  }
+  return { status: 'novo', atual };
+}
+
+const MICRO_DOT = { evoluindo:'🟢', parado:'🟠', novo:'🔵', vazio:'⚪' };
+
+function renderMicroGrid() {
+  const wrap = document.getElementById('micro-grid-wrap');
+  const ativos = vendedores;
+  if (!ativos.length) { wrap.innerHTML = '<div class="loading-v">Sem vendedores ativos.</div>'; return; }
+
+  let html = `<table style="border-collapse:collapse;width:100%;font-size:12px">
+    <tr>
+      <th style="position:sticky;left:0;background:var(--bg2);padding:6px 8px;text-align:left;border-bottom:2px solid var(--border);min-width:40px;z-index:1">Hora</th>
+      ${ativos.map(v=>`<th style="padding:6px 8px;text-align:center;border-bottom:2px solid var(--border);min-width:60px;color:var(--text2);font-weight:700">${v.name.split(' ')[0]}</th>`).join('')}
+    </tr>`;
+
+  microHoras.forEach((hora, idx) => {
+    html += `<tr><td style="position:sticky;left:0;background:var(--bg2);padding:6px 8px;font-weight:700;color:var(--text3);border-bottom:1px solid var(--border)">${hora}h</td>`;
+    ativos.forEach(v => {
+      const { status, atual } = statusMicro(v.code, idx);
+      const resumo = atual ? `${atual.ligacoes}x` : '—';
+      html += `<td style="padding:4px;text-align:center;border-bottom:1px solid var(--border);cursor:pointer" onclick="abrirMicroModal('${v.code}','${hora}')">
+        <div style="font-size:15px;line-height:1">${MICRO_DOT[status]}</div>
+        <div style="font-size:10px;color:var(--text3);margin-top:2px">${resumo}</div>
+      </td>`;
+    });
+    html += `</tr>`;
+  });
+  html += `</table>`;
+  wrap.innerHTML = html;
+}
+
+function abrirMicroModal(code, hora) {
+  const v = vendedores.find(x => x.code === code);
+  if (!v) return;
+  microEditando = { code, hora };
+  const atual = microData[hora]?.[code] || {};
+  document.getElementById('micro-modal-title').textContent = `${v.name.split(' ')[0]} — ${hora}h`;
+  document.getElementById('micro-hf').value  = atual.hf || 0;
+  document.getElementById('micro-lig').value = atual.ligacoes || 0;
+  document.getElementById('micro-con').value = atual.conectado || 0;
+  document.getElementById('micro-modal').classList.add('show');
+}
+function fecharMicroModal() { document.getElementById('micro-modal').classList.remove('show'); microEditando = null; }
+
+async function salvarMicroCelula() {
+  if (!microEditando) return;
+  const { code, hora } = microEditando;
+  const dataISO = document.getElementById('micro-data').value;
+  const btn = document.querySelector('#micro-modal .modal-confirm');
+  btn.disabled = true;
+  try {
+    await api('/api/micro', { method:'POST', headers: ah(), body: JSON.stringify({
+      team: TEAM_ID, data: dataISO, hora, vendorCode: code,
+      hf:        parseInt(document.getElementById('micro-hf').value)  || 0,
+      ligacoes:  parseInt(document.getElementById('micro-lig').value) || 0,
+      conectado: parseInt(document.getElementById('micro-con').value) || 0,
+    })});
+    fecharMicroModal();
+    showToast('Registrado!','toast-metrica');
+    await carregarMicro();
+  } catch(e) { showToast('Erro: '+e.message,'toast-erro'); }
+  btn.disabled = false;
 }
 
 // ── RELATÓRIO DE PRODUTIVIDADE ──────────────────────────
