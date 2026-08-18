@@ -1303,6 +1303,7 @@ const TEAM_TABS_DEF = [
   {id:'st-vd', label:'Status + Vendas'},
   {id:'vendors', label:'Vendedores'},
   {id:'grupos', label:'Grupos'},
+  {id:'relatorio', label:'Relatório'},
 ];
 let teamTab = 'st-vd';
 
@@ -1323,6 +1324,59 @@ async function setTeamTab(tab, el) {
   if (tab==='st-vd') await renderStatusVendas(body);
   else if (tab==='vendors') await renderVendors(body);
   else if (tab==='grupos') await renderGrupos(body);
+  else if (tab==='relatorio') await renderRelatorio(body);
+}
+
+// ── RELATÓRIO DE PRODUTIVIDADE ──────────────────────────
+async function renderRelatorio(body) {
+  body.innerHTML = `
+    <div class="admin-box">
+      <div class="admin-box-title">Relatório de produtividade</div>
+      <div style="display:flex;gap:8px;margin-bottom:12px;align-items:flex-end">
+        <div style="flex:1">
+          <label style="font-size:10px;color:var(--text3);font-weight:700;display:block;margin-bottom:4px">DATA</label>
+          <input type="date" id="rel-data" value="${todayISO()}" style="width:100%;border:1.5px solid var(--border);border-radius:8px;padding:9px 11px;font-size:13px;color:var(--text);background:var(--bg3);outline:none">
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:4px">
+        <button class="admin-add-btn" style="flex:1" onclick="gerarRelatorio('diario')">📅 Gerar diário</button>
+        <button class="admin-add-btn" style="flex:1;background:var(--green)" onclick="gerarRelatorio('semanal')">📊 Gerar semanal</button>
+      </div>
+      <div style="font-size:11px;color:var(--text3);margin-bottom:8px">O semanal acumula todos os dias já lançados da semana comercial até a data escolhida.</div>
+      <div id="rel-loading" style="display:none;text-align:center;padding:1rem;color:var(--text3);font-size:13px">Gerando...</div>
+      <div id="rel-output-wrap" style="display:none">
+        <textarea id="rel-output" readonly rows="18" style="width:100%;border:1.5px solid var(--border);border-radius:8px;padding:12px;font-size:12px;line-height:1.6;color:var(--text);background:var(--bg3);font-family:'SF Mono',Menlo,Consolas,monospace;resize:vertical;white-space:pre-wrap"></textarea>
+        <button class="admin-add-btn" style="margin-top:8px" onclick="copiarRelatorio()">📋 Copiar texto</button>
+      </div>
+    </div>`;
+}
+
+async function gerarRelatorio(tipo) {
+  const dateEl = document.getElementById('rel-data');
+  if (!dateEl?.value) { showToast('Selecione uma data','toast-erro'); return; }
+  const [a,m,d] = dateEl.value.split('-');
+  const dataBR = `${d}/${m}/${a}`;
+  document.getElementById('rel-loading').style.display = 'block';
+  document.getElementById('rel-output-wrap').style.display = 'none';
+  try {
+    const path = tipo === 'diario' ? '/api/relatorio-diario' : '/api/relatorio-semanal';
+    const r = await api(`${path}?team=${TEAM_ID}&data=${encodeURIComponent(dataBR)}`, { headers: ah() });
+    document.getElementById('rel-output').value = r.texto;
+    document.getElementById('rel-output-wrap').style.display = 'block';
+  } catch(e) { showToast('Erro: '+e.message,'toast-erro'); }
+  document.getElementById('rel-loading').style.display = 'none';
+}
+
+async function copiarRelatorio() {
+  const el = document.getElementById('rel-output');
+  try {
+    await navigator.clipboard.writeText(el.value);
+    showToast('Relatório copiado!','toast-metrica');
+  } catch(e) {
+    el.select();
+    document.execCommand('copy');
+    showToast('Relatório copiado!','toast-metrica');
+  }
 }
 
 async function renderStatusVendas(body) {
