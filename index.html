@@ -1363,6 +1363,7 @@ async function gerarRelatorio(tipo) {
     const r = await api(`${path}?team=${TEAM_ID}&data=${encodeURIComponent(dataBR)}`, { headers: ah() });
     document.getElementById('rel-output').value = r.texto;
     document.getElementById('rel-output-wrap').style.display = 'block';
+    if (r.avisos?.length) showToast(`Atenção: falha ao buscar dados de ${r.avisos.length} vendedor(es) — veja o aviso no texto`, 'toast-erro');
   } catch(e) { showToast('Erro: '+e.message,'toast-erro'); }
   document.getElementById('rel-loading').style.display = 'none';
 }
