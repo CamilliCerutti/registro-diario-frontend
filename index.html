@@ -595,11 +595,29 @@ input[type=date]::-webkit-calendar-picker-indicator{filter:invert(.5)}
 </div>
 <!-- MODAL microgerenciamento -->
 <div class="modal-overlay" id="micro-modal">
-  <div class="modal">
+  <div class="modal" style="max-width:340px">
     <h2 id="micro-modal-title">Editar</h2>
-    <div class="field-row"><label>Tempo falado (min, acumulado no dia)</label><input type="number" id="micro-hf" min="0"></div>
+    <div class="field-row">
+      <label>Tempo falado (acumulado no dia)</label>
+      <div class="time-row">
+        <input class="time-inp" type="number" id="micro-hf-h" value="0" min="0">
+        <span class="time-sep">:</span>
+        <input class="time-inp" type="number" id="micro-hf-m" value="0" min="0" max="59">
+        <span class="time-sep">:</span>
+        <input class="time-inp" type="number" id="micro-hf-s" value="0" min="0" max="59">
+      </div>
+    </div>
     <div class="field-row"><label>Ligações (acumulado no dia)</label><input type="number" id="micro-lig" min="0"></div>
-    <div class="field-row"><label>Tempo conectado (min, acumulado no dia)</label><input type="number" id="micro-con" min="0"></div>
+    <div class="field-row">
+      <label>Tempo conectado (acumulado no dia)</label>
+      <div class="time-row">
+        <input class="time-inp" type="number" id="micro-con-h" value="0" min="0">
+        <span class="time-sep">:</span>
+        <input class="time-inp" type="number" id="micro-con-m" value="0" min="0" max="59">
+        <span class="time-sep">:</span>
+        <input class="time-inp" type="number" id="micro-con-s" value="0" min="0" max="59">
+      </div>
+    </div>
     <div class="modal-btns">
       <button class="modal-cancel" onclick="fecharMicroModal()">Cancelar</button>
       <button class="modal-confirm" onclick="salvarMicroCelula()">Salvar</button>
@@ -1316,7 +1334,6 @@ async function enterCtx(ctx) {
 const TEAM_TABS_DEF = [
   {id:'st-vd', label:'Status + Vendas'},
   {id:'vendors', label:'Vendedores'},
-  {id:'grupos', label:'Grupos'},
   {id:'relatorio', label:'Relatório'},
   {id:'micro', label:'Micro'},
 ];
@@ -1338,7 +1355,6 @@ async function setTeamTab(tab, el) {
   body.innerHTML = '<div class="loading-v">Carregando...</div>';
   if (tab==='st-vd') await renderStatusVendas(body);
   else if (tab==='vendors') await renderVendors(body);
-  else if (tab==='grupos') await renderGrupos(body);
   else if (tab==='relatorio') await renderRelatorio(body);
   else if (tab==='micro') await renderMicro(body);
 }
@@ -1388,6 +1404,23 @@ function statusEntrada(entradas, idx) {
   return evoluiu ? 'evoluindo' : 'parado';
 }
 
+function hmsDeSegundos(s) {
+  s = s || 0;
+  const h=Math.floor(s/3600), m=Math.floor((s%3600)/60), sec=s%60;
+  return `${h}:${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
+}
+
+// Panorama do dia: compara 1ª e última conferência da pessoa
+function panoramaVendedor(entradas) {
+  if (entradas.length < 2) return null;
+  const primeira = entradas[0], ultima = entradas[entradas.length - 1];
+  const dHf  = ultima.hf - primeira.hf;
+  const dLig = ultima.ligacoes - primeira.ligacoes;
+  const dCon = ultima.conectado - primeira.conectado;
+  const evoluiu = dHf > 0 || dLig > 0 || dCon > 0;
+  return { dHf, dLig, dCon, evoluiu, desde: primeira.hora };
+}
+
 function renderMicroList() {
   const wrap = document.getElementById('micro-list');
   const ativos = vendedores;
@@ -1396,19 +1429,21 @@ function renderMicroList() {
   wrap.innerHTML = ativos.map(v => {
     const entradas = microData[v.code] || [];
     const ultima = entradas[entradas.length - 1];
+    const pan = panoramaVendedor(entradas);
     const linhas = entradas.map((e, idx) => ({ e, idx })).reverse().map(({e, idx}) => `
       <div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border);font-size:12px;flex-wrap:wrap">
         <span>${MICRO_DOT[statusEntrada(entradas, idx)]}</span>
         <span style="font-weight:700;color:var(--text);min-width:64px">${e.hora}</span>
-        <span style="color:var(--text2)">HF: ${e.hf}min</span>
+        <span style="color:var(--text2)">HF: ${hmsDeSegundos(e.hf)}</span>
         <span style="color:var(--text2)">Lig: ${e.ligacoes}</span>
-        <span style="color:var(--text2)">Con: ${e.conectado}min</span>
+        <span style="color:var(--text2)">Con: ${hmsDeSegundos(e.conectado)}</span>
       </div>`).join('');
     return `<div class="venda-item" style="margin-bottom:10px">
       <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;gap:8px">
         <div style="min-width:0">
           <div style="font-size:13px;font-weight:700;color:var(--text)">${v.name}</div>
           <div style="font-size:11px;color:var(--text3)">${entradas.length} conferência${entradas.length!==1?'s':''}${ultima?` · última às ${ultima.hora}`:''}</div>
+          ${pan ? `<div style="font-size:11px;margin-top:4px;color:${pan.evoluiu?'var(--green3)':'var(--amber)'}">${pan.evoluiu?'📈':'⏸'} desde ${pan.desde}: +${pan.dLig} lig · +${hmsDeSegundos(pan.dHf)} HF · +${hmsDeSegundos(pan.dCon)} conectado</div>` : ''}
         </div>
         <button class="edit-btn" style="flex-shrink:0" onclick="abrirMicroModal('${v.code}')">+ Agora</button>
       </div>
@@ -1430,12 +1465,24 @@ function abrirMicroModal(code) {
   const ultima = entradas[entradas.length - 1] || { hf:0, ligacoes:0, conectado:0 };
   microEditando = { code, hora };
   document.getElementById('micro-modal-title').textContent = `${v.name.split(' ')[0]} — ${hora}`;
-  document.getElementById('micro-hf').value  = ultima.hf;
-  document.getElementById('micro-lig').value = ultima.ligacoes;
-  document.getElementById('micro-con').value = ultima.conectado;
+  const hf  = ultima.hf || 0, con = ultima.conectado || 0;
+  document.getElementById('micro-hf-h').value  = Math.floor(hf/3600);
+  document.getElementById('micro-hf-m').value  = Math.floor((hf%3600)/60);
+  document.getElementById('micro-hf-s').value  = hf%60;
+  document.getElementById('micro-lig').value   = ultima.ligacoes || 0;
+  document.getElementById('micro-con-h').value = Math.floor(con/3600);
+  document.getElementById('micro-con-m').value = Math.floor((con%3600)/60);
+  document.getElementById('micro-con-s').value = con%60;
   document.getElementById('micro-modal').classList.add('show');
 }
 function fecharMicroModal() { document.getElementById('micro-modal').classList.remove('show'); microEditando = null; }
+
+function segundosDosCampos(prefix) {
+  const h = parseInt(document.getElementById(`${prefix}-h`).value) || 0;
+  const m = parseInt(document.getElementById(`${prefix}-m`).value) || 0;
+  const s = parseInt(document.getElementById(`${prefix}-s`).value) || 0;
+  return h*3600 + m*60 + s;
+}
 
 async function salvarMicroCelula() {
   if (!microEditando) return;
@@ -1446,9 +1493,9 @@ async function salvarMicroCelula() {
   try {
     await api('/api/micro', { method:'POST', headers: ah(), body: JSON.stringify({
       team: TEAM_ID, data: dataISO, hora, vendorCode: code,
-      hf:        parseInt(document.getElementById('micro-hf').value)  || 0,
+      hf:        segundosDosCampos('micro-hf'),
       ligacoes:  parseInt(document.getElementById('micro-lig').value) || 0,
-      conectado: parseInt(document.getElementById('micro-con').value) || 0,
+      conectado: segundosDosCampos('micro-con'),
     })});
     fecharMicroModal();
     showToast('Registrado!','toast-metrica');
@@ -1706,111 +1753,6 @@ async function delVendor(tId, code) {
   await api(`/admin/supervisor/${tId}/vendor/${code}`, {method:'DELETE',headers:ah()});
   vendedores = (await api(`/vendedores?team=${TEAM_ID}`)).filter(v=>!v.exitDate);
   renderVendors(document.getElementById('team-panel-body'));
-}
-
-async function renderGrupos(body) {
-  const tId = adminCtx;
-  const [gs, tvs, cfg] = await Promise.all([
-    api(`/api/grupos?team=${tId}`).catch(()=>[]),
-    api(`/vendedores?team=${tId}`).catch(()=>[]),
-    api('/api/config').catch(()=>({immersions:[]})),
-  ]);
-  const allImm = cfg.immersions||[];
-  body.innerHTML = `
-    <div class="admin-box">
-      <div class="admin-box-title">Grupos (${gs.length})</div>
-      ${gs.length===0?'<div style="font-size:13px;color:var(--text3)">Nenhum grupo ainda.</div>':gs.map(g=>`
-        <div class="vend-row">
-          <div style="display:flex;align-items:center;gap:8px">
-            <div style="width:10px;height:10px;border-radius:50%;background:${g.color||'var(--tc)'}"></div>
-            <div><div class="vend-nome">${g.name}</div><div class="vend-aba">${g.members?.length||0} membros · Meta HC: ${g.hcGoal} (${g.hcPerVendor||0}/pessoa)${g.periodoInicio?` · ${isoToBR(g.periodoInicio)} → ${isoToBR(g.periodoFim)}`:' · Período não definido'}</div></div>
-          </div>
-          <div style="display:flex;gap:6px">
-            <button class="edit-btn" onclick="fillGrupo('${tId}','${g.id}')">Editar</button>
-            <button class="vend-remove" onclick="delGrupo('${tId}','${g.id}')">×</button>
-          </div>
-        </div>`).join('')}
-    </div>
-    <div class="admin-box">
-      <div class="admin-box-title">Criar / Editar Grupo</div>
-      <input type="hidden" id="gf-id">
-      <div style="display:grid;grid-template-columns:1fr auto;gap:8px;margin-bottom:8px">
-        <input type="text" id="gf-name" placeholder="Nome do grupo" style="margin:0">
-        <input type="color" id="gf-color" value="#4c9fff" style="width:42px;height:42px;padding:3px;cursor:pointer;border:1.5px solid var(--border);border-radius:9px;margin:0">
-      </div>
-      <input type="number" id="gf-hc" placeholder="Meta de HC total do grupo" min="0">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
-        <div>
-          <label style="font-size:10px;color:var(--text3);font-weight:700;text-transform:uppercase;display:block;margin-bottom:4px">Início do período</label>
-          <input type="date" id="gf-inicio" style="margin:0">
-        </div>
-        <div>
-          <label style="font-size:10px;color:var(--text3);font-weight:700;text-transform:uppercase;display:block;margin-bottom:4px">Fim do período</label>
-          <input type="date" id="gf-fim" style="margin:0">
-        </div>
-      </div>
-      <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;margin-bottom:6px">Vendedores</div>
-      <div style="background:var(--bg3);border:1.5px solid var(--border);border-radius:9px;padding:10px;max-height:160px;overflow-y:auto;display:flex;flex-direction:column;gap:7px;margin-bottom:8px">
-        ${tvs.filter(v=>!v.exitDate).map(v=>`
-          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;color:var(--text)">
-            <input type="checkbox" class="gf-v" value="${v.code}" style="width:auto;accent-color:var(--tc)">
-            ${v.name} <span style="font-size:10px;color:var(--text3)">${v.code}</span>
-          </label>`).join('')}
-      </div>
-      <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;margin-bottom:6px">Imersões atribuídas</div>
-      <div style="background:var(--bg3);border:1.5px solid var(--border);border-radius:9px;padding:10px;max-height:120px;overflow-y:auto;display:flex;flex-direction:column;gap:7px;margin-bottom:8px">
-        ${allImm.length===0?'<span style="font-size:12px;color:var(--text3)">Nenhuma imersão cadastrada.</span>':allImm.map(im=>`
-          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;color:var(--text)">
-            <input type="checkbox" class="gf-i" value="${im.id}" style="width:auto;accent-color:var(--tc)">
-            ${im.name} <span style="font-size:10px;color:var(--text3)">${isoToBR(im.startDate)}</span>
-          </label>`).join('')}
-      </div>
-      <button class="admin-add-btn" onclick="saveGrupo('${tId}')">Salvar Grupo</button>
-      <div id="gf-msg" style="font-size:12px;margin-top:6px;min-height:18px"></div>
-    </div>`;
-}
-
-async function fillGrupo(tId, groupId) {
-  const gs = await api(`/api/grupos?team=${tId}`).catch(()=>[]);
-  const g = gs.find(x=>x.id===groupId); if (!g) return;
-  document.getElementById('gf-id').value    = g.id;
-  document.getElementById('gf-name').value  = g.name;
-  document.getElementById('gf-color').value = g.color||'#4c9fff';
-  document.getElementById('gf-hc').value    = g.hcGoal||0;
-  document.getElementById('gf-inicio').value = g.periodoInicio||'';
-  document.getElementById('gf-fim').value    = g.periodoFim||'';
-  document.querySelectorAll('.gf-v').forEach(cb=>{ cb.checked=(g.vendorCodes||[]).includes(cb.value); });
-  document.querySelectorAll('.gf-i').forEach(cb=>{ cb.checked=(g.immersionIds||[]).includes(cb.value); });
-  document.getElementById('gf-name').scrollIntoView({behavior:'smooth'});
-}
-
-async function saveGrupo(tId) {
-  const msg = document.getElementById('gf-msg');
-  msg.style.color='var(--amber)'; msg.textContent='Salvando...';
-  const gId = document.getElementById('gf-id').value;
-  try {
-    const r = await api(`/admin/supervisor/${tId}/grupo`, { method:'POST', headers:ah(), body:JSON.stringify({
-      ...(gId && {id:gId}),
-      name:         document.getElementById('gf-name').value.trim(),
-      color:        document.getElementById('gf-color').value,
-      hcGoal:       parseInt(document.getElementById('gf-hc').value)||0,
-      periodoInicio: document.getElementById('gf-inicio').value||null,
-      periodoFim:    document.getElementById('gf-fim').value||null,
-      vendorCodes:  [...document.querySelectorAll('.gf-v:checked')].map(c=>c.value),
-      immersionIds: [...document.querySelectorAll('.gf-i:checked')].map(c=>c.value),
-    })});
-    msg.style.color='var(--green)'; msg.textContent=r.savedToGitHub?'✓ Salvo e publicado!':'✓ Salvo';
-    document.getElementById('gf-id').value='';
-    grupos = await api(`/api/grupos?team=${TEAM_ID}`).catch(()=>[]);
-    setTimeout(()=>renderGrupos(document.getElementById('team-panel-body')),500);
-  } catch(e) { msg.style.color='var(--red)'; msg.textContent='Erro: '+e.message; }
-}
-
-async function delGrupo(tId, groupId) {
-  if (!confirm('Remover este grupo?')) return;
-  await api(`/admin/supervisor/${tId}/grupo/${groupId}`, {method:'DELETE',headers:ah()});
-  grupos = await api(`/api/grupos?team=${TEAM_ID}`).catch(()=>[]);
-  renderGrupos(document.getElementById('team-panel-body'));
 }
 
 // ── GLOBAL PANEL ──────────────────────────────────────
