@@ -627,7 +627,6 @@ input[type=date]::-webkit-calendar-picker-indicator{filter:invert(.5)}
 
 <div class="toast" id="toast"></div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
 <script>
 // ══════════════════════════════════════════════════════
 // CONFIG
@@ -1459,25 +1458,23 @@ function dotCompacto(entradas, pan) {
   return PANORAMA_STYLE[pan.nivel].dot;
 }
 
-let microCharts = {};      // 'lig-CODE' / 'hf-CODE' -> Chart.js instance
 let microExpandido = new Set(); // codes com o card aberto
-
-function destruirMicroCharts() {
-  Object.values(microCharts).forEach(c => c.destroy());
-  microCharts = {};
-}
 
 function toggleMicroExpand(code) {
   if (microExpandido.has(code)) microExpandido.delete(code); else microExpandido.add(code);
   renderMicroList();
 }
 
-const MICRO_CHART_MIN_PONTOS = 6; // abaixo disso o gráfico não agrega leitura de ritmo
+// 'HH:MM:SS' -> '15h20' (sem segundos, sem zero à esquerda na hora)
+function horaCurta(hms) {
+  if (!hms) return '';
+  const [h, m] = hms.split(':');
+  return `${parseInt(h,10)}h${m}`;
+}
 
 function renderMicroList() {
   const wrap = document.getElementById('micro-list');
   const ativos = vendedores;
-  destruirMicroCharts();
   if (!ativos.length) { wrap.innerHTML = '<div class="loading-v">Sem vendedores ativos.</div>'; return; }
 
   wrap.innerHTML = ativos.map(v => {
@@ -1485,25 +1482,15 @@ function renderMicroList() {
     const ultima = entradas[entradas.length - 1];
     const pan = panoramaVendedor(entradas);
     const aberto = microExpandido.has(v.code);
-    const linhas = entradas.map((e, idx) => ({ e, idx })).reverse().map(({e, idx}) => `
+    // Ordem cronológica — conferência mais nova fica embaixo, como foi preenchida
+    const linhas = entradas.map((e, idx) => `
       <div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border);font-size:12px;flex-wrap:wrap">
         <span>${MICRO_DOT[statusEntrada(entradas, idx)]}</span>
-        <span style="font-weight:700;color:var(--text);min-width:64px">${e.hora}</span>
+        <span style="font-weight:700;color:var(--text);min-width:56px">${horaCurta(e.hora)}</span>
         <span style="color:var(--text2)">HF: ${tempoAbsoluto(e.hf)}</span>
         <span style="color:var(--text2)">Lig: ${e.ligacoes}</span>
         <span style="color:var(--text2)">Con: ${tempoAbsoluto(e.conectado)}</span>
       </div>`).join('');
-
-    const chartsHtml = entradas.length >= MICRO_CHART_MIN_PONTOS
-      ? `<div style="margin-top:10px">
-          <div style="font-size:10px;color:var(--text3);font-weight:700;text-transform:uppercase;margin-bottom:3px">Ligações</div>
-          <div style="height:70px"><canvas id="chart-lig-${v.code}"></canvas></div>
-          <div style="font-size:10px;color:var(--text3);font-weight:700;text-transform:uppercase;margin:10px 0 3px">Horas faladas (min)</div>
-          <div style="height:70px"><canvas id="chart-hf-${v.code}"></canvas></div>
-        </div>`
-      : entradas.length >= 2
-        ? `<div style="font-size:11px;color:var(--text3);font-style:italic;margin-top:8px">Gráfico de ritmo aparece a partir de ${MICRO_CHART_MIN_PONTOS} conferências (tem ${entradas.length})</div>`
-        : '';
 
     return `<div class="venda-item" style="margin-bottom:8px">
       <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;gap:8px;cursor:pointer" onclick="toggleMicroExpand('${v.code}')">
@@ -1511,7 +1498,7 @@ function renderMicroList() {
           <span style="flex-shrink:0">${dotCompacto(entradas, pan)}</span>
           <div style="min-width:0">
             <div style="font-size:13px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${v.name}</div>
-            <div style="font-size:11px;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${!ultima ? 'sem conferência' : `última ${ultima.hora}${pan?` · ${pan.dLig>=0?'+':''}${pan.dLig} lig · ${tempoDelta(pan.dHf)} HF`:''}`}</div>
+            <div style="font-size:11px;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${!ultima ? 'sem conferência' : `última ${horaCurta(ultima.hora)}${pan?` · ${pan.dLig>=0?'+':''}${pan.dLig} lig · ${tempoDelta(pan.dHf)} HF`:''}`}</div>
           </div>
         </div>
         <div style="display:flex;align-items:center;gap:6px;flex-shrink:0" onclick="event.stopPropagation()">
@@ -1521,50 +1508,11 @@ function renderMicroList() {
         </div>
       </div>
       ${aberto ? `<div style="padding:0 14px 12px;border-top:1px solid var(--border);margin-top:2px">
-        ${pan ? `<div style="font-size:11px;margin-top:10px;color:${PANORAMA_STYLE[pan.nivel].cor}">${PANORAMA_STYLE[pan.nivel].icone} desde ${pan.desde}: ${pan.dLig>=0?'+':''}${pan.dLig} lig · ${tempoDelta(pan.dHf)} HF · ${tempoDelta(pan.dCon)} conectado</div>` : ''}
-        ${chartsHtml}
+        ${pan ? `<div style="font-size:11px;margin-top:10px;color:${PANORAMA_STYLE[pan.nivel].cor}">${PANORAMA_STYLE[pan.nivel].icone} desde ${horaCurta(pan.desde)}: ${pan.dLig>=0?'+':''}${pan.dLig} lig · ${tempoDelta(pan.dHf)} HF · ${tempoDelta(pan.dCon)} conectado</div>` : ''}
         ${entradas.length ? `<div style="margin-top:10px">${linhas}</div>` : ''}
       </div>` : ''}
     </div>`;
   }).join('');
-
-  renderMicroCharts();
-}
-
-function miniChartConfig(labels, data, cor, corGrid, corTxt) {
-  return {
-    type: 'line',
-    data: { labels, datasets: [{ data, borderColor: cor, backgroundColor: cor, tension:.3, pointRadius:2, borderWidth:2 }] },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: { legend: { display: false } },
-      scales: {
-        x: { ticks: { color: corTxt, font: { size: 8 } }, grid: { display: false } },
-        y: { beginAtZero: true, ticks: { color: corTxt, font: { size: 8 } }, grid: { color: corGrid } },
-      },
-    },
-  };
-}
-
-function renderMicroCharts() {
-  if (typeof Chart === 'undefined') return; // CDN indisponível — não quebra o resto da tela
-  const style   = getComputedStyle(document.body);
-  // Cores neutras — verde/laranja/vermelho ficam reservados pro sistema de status (dots e panorama)
-  const corLig  = style.getPropertyValue('--purple2').trim() || '#7F77DD';
-  const corHf   = style.getPropertyValue('--text2').trim()   || '#555';
-  const corGrid = style.getPropertyValue('--border').trim()  || '#e5e3f5';
-  const corTxt  = style.getPropertyValue('--text3').trim()   || '#aaa';
-
-  vendedores.forEach(v => {
-    const entradas = microData[v.code] || [];
-    if (entradas.length < MICRO_CHART_MIN_PONTOS || !microExpandido.has(v.code)) return;
-    const labels = entradas.map(e => e.hora.slice(0,5));
-    const canvasLig = document.getElementById(`chart-lig-${v.code}`);
-    const canvasHf  = document.getElementById(`chart-hf-${v.code}`);
-    if (canvasLig) microCharts[`lig-${v.code}`] = new Chart(canvasLig.getContext('2d'), miniChartConfig(labels, entradas.map(e=>e.ligacoes), corLig, corGrid, corTxt));
-    if (canvasHf)  microCharts[`hf-${v.code}`]  = new Chart(canvasHf.getContext('2d'),  miniChartConfig(labels, entradas.map(e=>Math.round(e.hf/60)), corHf, corGrid, corTxt));
-  });
 }
 
 function copiarAtualizacaoMicro(code) {
@@ -1594,7 +1542,7 @@ function abrirMicroModal(code) {
   const entradas = microData[code] || [];
   const ultima = entradas[entradas.length - 1] || { hf:0, ligacoes:0, conectado:0 };
   microEditando = { code, hora };
-  document.getElementById('micro-modal-title').textContent = `${v.name.split(' ')[0]} — ${hora}`;
+  document.getElementById('micro-modal-title').textContent = `${v.name.split(' ')[0]} — ${horaCurta(hora)}`;
   const hf  = ultima.hf || 0, con = ultima.conectado || 0;
   document.getElementById('micro-hf-h').value  = Math.floor(hf/3600);
   document.getElementById('micro-hf-m').value  = Math.floor((hf%3600)/60);
