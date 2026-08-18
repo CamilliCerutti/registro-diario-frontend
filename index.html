@@ -1,0 +1,1796 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Registro Diário</title>
+<link rel="icon" href="https://fav.farm/📋" type="image/png">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f0eefb;--bg2:#fff;--bg3:#faf9ff;--bg4:#f5f3ff;
+  --border:#e5e3f5;--border2:#c5c0ee;
+  --text:#1a1a1a;--text2:#555;--text3:#aaa;
+  --purple:#4B2D8F;--purple2:#7F77DD;--purple3:#EEEDFE;
+  --green:#1D9E75;--green2:#EAF3DE;--green3:#0F6E56;
+  --amber:#EF9F27;--red:#E24B4A;
+  --tc:#4B2D8F;--r:14px;--rs:9px;
+  --shadow:0 1px 4px rgba(75,45,143,0.09);
+}
+body.dark{
+  --bg:#0d0f14;--bg2:#131720;--bg3:#1c2130;--bg4:#232b3e;
+  --border:#2a3347;--border2:#3a4a65;
+  --text:#e8ecf4;--text2:#8a95b0;--text3:#55627a;
+  --purple3:rgba(75,45,143,0.25);--green2:rgba(29,158,117,0.15);
+  --shadow:0 1px 4px rgba(0,0,0,0.3);
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:60px;transition:background .2s,color .2s}
+
+/* ── APP CONTAINER ── */
+.app{max-width:520px;margin:0 auto}
+
+/* ── TOPBAR ── */
+.topbar{background:var(--tc);padding:0 16px;display:flex;align-items:center;height:52px;gap:10px;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.2)}
+.logo{font-size:16px;font-weight:800;color:#fff;letter-spacing:-.5px;cursor:pointer;text-decoration:none}
+.team-pill{background:rgba(255,255,255,.18);border-radius:100px;padding:3px 10px;font-size:11px;font-weight:700;color:#fff}
+.topbar-r{margin-left:auto;display:flex;gap:7px;align-items:center}
+.tbtn{padding:5px 11px;border-radius:7px;border:1px solid rgba(255,255,255,.3);background:rgba(255,255,255,.1);color:#fff;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s}
+.tbtn:hover{background:rgba(255,255,255,.25)}
+
+/* ── DATE NAV ── */
+.date-nav{background:rgba(0,0,0,.12);padding:9px 16px;display:flex;align-items:center;justify-content:space-between}
+.date-nav button{background:rgba(255,255,255,.15);border:none;color:rgba(255,255,255,.8);border-radius:6px;width:26px;height:26px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;line-height:1}
+.date-nav button:hover{background:rgba(255,255,255,.25)}
+.date-label{font-size:13px;font-weight:600;color:rgba(255,255,255,.9)}
+body.dark .date-nav{background:rgba(0,0,0,.3)}
+
+/* ── TABS ── */
+.tabs{display:flex;padding:10px 14px;gap:8px;background:var(--tc)}
+.tab{flex:1;padding:11px;border-radius:12px;border:none;font-size:14px;font-weight:700;cursor:pointer;transition:all .2s}
+.tab.on{background:#fff;color:var(--tc);box-shadow:0 2px 12px rgba(0,0,0,.15)}
+.tab.off{background:rgba(255,255,255,.13);color:rgba(255,255,255,.65)}
+.tab.off:hover{background:rgba(255,255,255,.22);color:#fff}
+
+/* ── SECTION / CARD ── */
+.tab-body{padding:14px}
+/* visibilidade controlada 100% por JavaScript via style.display */
+.section-label{font-size:11px;font-weight:700;color:var(--purple2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;margin-top:4px}
+.card{background:var(--bg2);border-radius:var(--r);padding:14px;margin-bottom:12px;box-shadow:var(--shadow)}
+
+/* ── TIME INPUTS (CLINT / 3C) ── */
+.source-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.source-tag{font-size:11px;padding:2px 9px;border-radius:100px;font-weight:700}
+.tag-clint{background:#E6F1FB;color:#185FA5}
+.tag-3c{background:var(--purple3);color:var(--purple2)}
+.time-row{display:flex;align-items:center;gap:5px}
+.time-lbl{font-size:11px;color:var(--text3);text-align:center;width:28px}
+.time-inp{flex:1;border:1.5px solid var(--border);border-radius:8px;padding:9px 4px;text-align:center;font-size:18px;font-weight:700;color:var(--tc);background:var(--bg3);outline:none;min-width:0;-moz-appearance:textfield}
+.time-inp::-webkit-inner-spin-button,.time-inp::-webkit-outer-spin-button{-webkit-appearance:none}
+.time-inp:focus{border-color:var(--tc);background:var(--bg2)}
+.time-sep{font-size:18px;color:var(--text3);flex-shrink:0}
+
+/* ── 3C CAMPAIGNS ── */
+.camp-labels{display:flex;align-items:center;gap:6px;margin-bottom:5px}
+.camp-labels span{font-size:11px;color:var(--text3)}
+.camp-list{display:flex;flex-direction:column;gap:7px}
+.camp-item{display:flex;align-items:center;gap:6px}
+.camp-name{flex:1.2;border:1.5px solid var(--border);border-radius:8px;padding:7px 9px;font-size:13px;color:var(--text);background:var(--bg3);outline:none;min-width:0;font-family:inherit}
+.camp-name:focus{border-color:var(--tc)}
+.camp-name::placeholder{color:var(--text3)}
+.ctime{display:flex;align-items:center;gap:2px;flex:1}
+.ctime input{flex:1;border:1.5px solid var(--border);border-radius:7px;padding:7px 2px;text-align:center;font-size:13px;font-weight:700;color:var(--tc);background:var(--bg3);outline:none;min-width:0;-moz-appearance:textfield;font-family:inherit}
+.ctime input::-webkit-inner-spin-button,.ctime input::-webkit-outer-spin-button{-webkit-appearance:none}
+.ctime input:focus{border-color:var(--tc)}
+.ctime span{font-size:10px;color:var(--text3);flex-shrink:0}
+.del-btn{width:28px;height:28px;border-radius:7px;border:1.5px solid var(--border);background:none;cursor:pointer;color:var(--text3);font-size:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:1}
+.del-btn:hover{background:#fff0f0;color:var(--red);border-color:#f5c6c6}
+.add-camp-btn{width:100%;margin-top:8px;padding:8px;border-radius:8px;border:2px dashed var(--border);background:none;cursor:pointer;font-size:13px;color:var(--text3);font-family:inherit}
+.add-camp-btn:hover{border-color:var(--purple2);color:var(--tc)}
+
+/* ── TOTAL BOX ── */
+.total-box{background:var(--tc);border-radius:12px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.total-lbl{font-size:12px;color:rgba(255,255,255,.65)}
+.total-detail{font-size:11px;color:rgba(255,255,255,.45);margin-top:3px}
+.total-val{font-size:24px;font-weight:800;color:#fff;text-align:right;line-height:1}
+.total-min{font-size:11px;color:rgba(255,255,255,.5);text-align:right;margin-top:2px}
+
+/* ── COUNTERS ── */
+.metrics-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.metric-card{background:var(--bg2);border-radius:12px;padding:12px;border:1.5px solid var(--border)}
+.metric-card label{font-size:11px;color:var(--text3);display:block;margin-bottom:8px;font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+.counter{display:flex;align-items:center;gap:8px}
+.counter button{width:32px;height:32px;border-radius:8px;border:1.5px solid var(--border);background:var(--bg3);cursor:pointer;font-size:20px;color:var(--tc);display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:1}
+.counter button:hover{background:var(--purple3);border-color:var(--purple2)}
+.counter input{width:100%;text-align:center;font-size:24px;font-weight:800;color:var(--tc);border:none;background:transparent;outline:none;-moz-appearance:textfield;font-family:inherit}
+.counter input::-webkit-inner-spin-button,.counter input::-webkit-outer-spin-button{-webkit-appearance:none}
+
+/* ── RATES ── */
+.rates{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px}
+.rate{background:var(--purple3);border-radius:10px;padding:10px;text-align:center}
+.rate-val{font-size:16px;font-weight:700;color:var(--purple2)}
+.rate-lbl{font-size:9px;color:var(--purple2);margin-top:3px;opacity:.8}
+.rate-pace{background:var(--green2)}
+.rate-pace .rate-val{color:var(--green3);font-size:13px}
+.rate-pace .rate-lbl{color:var(--green3)}
+body.dark .rate{background:rgba(127,119,221,.15)}
+body.dark .rate-pace{background:rgba(29,158,117,.15)}
+
+/* ── PERÍODO ── */
+.periodo-box{background:var(--bg2);border-radius:var(--r);padding:14px;margin-bottom:12px;box-shadow:var(--shadow)}
+.periodo-inputs{display:flex;gap:8px;align-items:flex-end;margin-bottom:12px}
+.periodo-field{display:flex;flex-direction:column;gap:4px;flex:1}
+.periodo-field label{font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.04em}
+.periodo-field input{border:1.5px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13px;color:var(--text);background:var(--bg3);outline:none;width:100%;font-family:inherit}
+.periodo-field input:focus{border-color:var(--tc)}
+.periodo-search-btn{padding:9px 16px;border-radius:8px;border:none;background:var(--tc);color:#fff;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0}
+.periodo-search-btn:hover{opacity:.9}
+.periodo-stats{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px;margin-bottom:10px}
+.periodo-stat{background:var(--bg3);border-radius:8px;padding:8px;text-align:center}
+.pstat-val{font-size:14px;font-weight:700;color:var(--tc)}
+.pstat-lbl{font-size:9px;color:var(--text3);margin-top:2px}
+.periodo-rates{display:flex;flex-direction:column;gap:6px;margin-bottom:8px}
+.periodo-rate{display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:var(--bg3);border-radius:8px}
+.prate-lbl{font-size:12px;color:var(--text2)}
+.prate-val{font-size:14px;font-weight:700;color:var(--tc)}
+.periodo-rate-pace{background:var(--green2)}
+.periodo-rate-pace .prate-lbl,.periodo-rate-pace .prate-val{color:var(--green3)}
+body.dark .periodo-rate-pace{background:rgba(29,158,117,.15)}
+.periodo-dias{font-size:11px;color:var(--text3);text-align:right}
+
+/* ── COMMENTS ── */
+.comment-area textarea{width:100%;border:1.5px solid var(--border);border-radius:10px;padding:10px;font-size:13px;color:var(--text);background:var(--bg3);resize:none;outline:none;font-family:inherit;line-height:1.5}
+.comment-area textarea:focus{border-color:var(--tc);background:var(--bg2)}
+
+/* ── SAVE BUTTON ── */
+.saved-banner{display:none;background:#edfaf4;border:1.5px solid #9FE1CB;border-radius:10px;padding:10px 14px;margin-top:10px;align-items:center;justify-content:space-between}
+.saved-banner.show{display:flex}
+.saved-banner span{font-size:13px;color:var(--green3);font-weight:600}
+.saved-banner button{font-size:12px;color:var(--green3);background:#fff;border:1.5px solid #9FE1CB;border-radius:7px;padding:5px 12px;cursor:pointer}
+body.dark .saved-banner{background:rgba(29,158,117,.15);border-color:rgba(29,158,117,.4)}
+.submit-hint{font-size:11px;color:var(--text3);text-align:center;margin:10px 0 6px}
+.save-btn-m{width:100%;padding:14px;border-radius:12px;border:none;background:var(--tc);color:#fff;font-size:15px;font-weight:700;cursor:pointer;margin-top:4px}
+.save-btn-m:hover{opacity:.9}
+.save-btn-m:disabled{opacity:.35;cursor:not-allowed}
+
+/* ── VENDAS ── */
+.vendas-count{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.vendas-count-lbl{font-size:11px;font-weight:700;color:var(--purple2);text-transform:uppercase;letter-spacing:.06em}
+.vendas-badge{font-size:12px;font-weight:700;padding:3px 10px;border-radius:100px}
+.badge-zero{background:var(--purple3);color:var(--purple2)}
+.badge-ok{background:var(--green2);color:var(--green3)}
+.venda-item{background:var(--bg2);border-radius:12px;margin-bottom:10px;overflow:hidden;border:1.5px solid var(--border)}
+.venda-item.saved{border-color:#9FE1CB}
+.venda-collapsed{display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer}
+.venda-collapsed:hover{background:var(--bg3)}
+.venda-dot{width:8px;height:8px;border-radius:50%;background:var(--green);flex-shrink:0}
+.venda-dot.unsaved{background:var(--amber)}
+.venda-collapsed-info{flex:1;min-width:0}
+.venda-nome{font-size:13px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.venda-meta{font-size:11px;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+.venda-actions{display:flex;align-items:center;gap:6px;flex-shrink:0}
+.edit-btn{padding:5px 11px;border-radius:7px;border:1.5px solid var(--border);background:var(--bg3);color:var(--text2);font-size:12px;font-weight:600;cursor:pointer}
+.edit-btn:hover{border-color:var(--purple2);color:var(--tc)}
+.edit-btn.editing{background:var(--tc);color:#fff;border-color:var(--tc)}
+.venda-del-sm{width:24px;height:24px;border-radius:6px;border:1.5px solid var(--border);background:none;cursor:pointer;color:var(--text3);font-size:13px;display:flex;align-items:center;justify-content:center}
+.venda-del-sm:hover{background:#fff0f0;color:var(--red);border-color:#f5c6c6}
+.venda-expanded{display:none;padding:0 14px 14px;border-top:1px solid var(--border)}
+.venda-expanded.open{display:block}
+.field-row{display:flex;flex-direction:column;gap:4px;margin-bottom:10px}
+.field-row label{font-size:11px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+.field-row input,.field-row select,.field-row textarea{width:100%;border:1.5px solid var(--border);border-radius:8px;padding:9px 11px;font-size:13px;color:var(--text);background:var(--bg3);outline:none;font-family:inherit}
+.field-row input:focus,.field-row select:focus,.field-row textarea:focus{border-color:var(--tc);background:var(--bg2)}
+.field-row textarea{resize:none;line-height:1.4}
+.field-2col{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.field-2col .field-row{margin-bottom:0}
+.empty-vendas{text-align:center;padding:28px 16px;color:var(--text3);font-size:13px;border:2px dashed var(--border);border-radius:12px;margin-bottom:12px;line-height:1.6}
+.add-venda-btn{width:100%;padding:13px;border-radius:12px;border:2px dashed #9FE1CB;background:var(--green2);cursor:pointer;font-size:14px;color:var(--green3);font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:12px;font-family:inherit}
+.add-venda-btn:hover{opacity:.85}
+body.dark .add-venda-btn{background:rgba(29,158,117,.15);border-color:rgba(29,158,117,.4)}
+.save-btn-v{width:100%;padding:13px;border-radius:10px;border:none;background:var(--green);color:#fff;font-size:14px;font-weight:700;cursor:pointer}
+.save-btn-v:hover{opacity:.9}
+.save-btn-v:disabled{opacity:.4;cursor:not-allowed}
+
+/* ── SELECT SCREEN / GROUPS ── */
+.select-wrap{padding:16px}
+.select-wrap h2{font-size:18px;font-weight:700;color:var(--text);margin-bottom:4px}
+.select-wrap p{font-size:13px;color:var(--text3);margin-bottom:14px}
+.vendedor-btns{display:flex;flex-direction:column;gap:8px;margin-bottom:16px}
+.vendedor-btn{padding:13px 16px;border-radius:12px;border:1.5px solid var(--border);background:var(--bg2);text-align:left;cursor:pointer;display:flex;align-items:center;justify-content:space-between;transition:all .15s;font-family:inherit}
+.vendedor-btn:hover{background:var(--bg3);border-color:var(--purple2)}
+.vendedor-btn-nome{font-size:14px;font-weight:700;color:var(--text)}
+.vendedor-btn-cod{font-size:12px;color:var(--text3);background:var(--bg3);padding:2px 8px;border-radius:100px}
+.group-progress-cards{display:flex;flex-direction:column;gap:10px;margin-bottom:16px}
+.gpc{background:var(--bg2);border-radius:var(--r);padding:14px;box-shadow:var(--shadow);border-left:4px solid var(--tc)}
+.gpc-header{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.gpc-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.gpc-name{font-size:14px;font-weight:800;flex:1;color:var(--text)}
+.gpc-pct{font-size:13px;font-weight:700}
+.prog-bar{height:7px;background:var(--bg3);border-radius:100px;overflow:hidden;margin-bottom:8px}
+.prog-fill{height:100%;border-radius:100px;transition:width .5s ease}
+.gpc-members{display:flex;flex-direction:column;gap:4px}
+.gpc-member-row{display:flex;align-items:center;gap:8px}
+.gpc-member-name{font-size:12px;color:var(--text2);width:100px;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gpc-member-bar{flex:1;height:4px;background:var(--bg3);border-radius:100px;overflow:hidden}
+.gpc-member-fill{height:100%;border-radius:100px}
+.gpc-member-val{font-size:11px;color:var(--text3);width:50px;text-align:right;flex-shrink:0}
+.gpc-imm{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+.gpc-imm-tag{font-size:10px;font-weight:700;padding:2px 8px;border-radius:100px;border:1px solid var(--border);color:var(--text2)}
+
+/* ── CONFIRMED VENDOR CARD ── */
+.vendor-confirmed{background:var(--bg2);border-radius:var(--r);padding:12px 16px;display:flex;align-items:center;gap:12px;box-shadow:var(--shadow);margin-bottom:0}
+.vendor-avatar{width:38px;height:38px;border-radius:50%;background:var(--tc);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;color:#fff;flex-shrink:0}
+.vendor-info{flex:1}
+.vendor-name{font-size:15px;font-weight:800;color:var(--text)}
+.vendor-code{font-size:11px;color:var(--text3)}
+.vendor-change{font-size:11px;color:var(--text3);cursor:pointer;border-bottom:1px dashed var(--text3);white-space:nowrap}
+.vendor-change:hover{color:var(--text)}
+
+/* ── STATUS TIME / VENDAS (admin) ── */
+.status-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}
+.status-row:last-child{border-bottom:none}
+.status-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.dot-ok{background:var(--green)}
+.dot-no{background:var(--red)}
+.dot-parcial{background:var(--amber)}
+.status-nome{font-size:13px;font-weight:700;color:var(--text);min-width:90px}
+.status-dados{display:flex;gap:6px;flex-wrap:wrap;flex:1}
+.status-dado{font-size:11px;color:var(--text2);background:var(--bg3);padding:2px 7px;border-radius:100px}
+.status-dado.destaque{background:var(--purple3);color:var(--purple2);font-weight:600}
+.status-vazio{font-size:12px;color:var(--text3);font-style:italic}
+.vendas-vend-row{border:1.5px solid var(--border);border-radius:10px;margin-bottom:8px;overflow:hidden}
+.vendas-vend-header{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;cursor:pointer;background:var(--bg3)}
+.vendas-vend-header:hover{background:var(--bg4)}
+.vendas-vend-nome{font-size:13px;font-weight:700;color:var(--text)}
+.vendas-vend-count{font-size:11px;font-weight:700;padding:2px 8px;border-radius:100px}
+.vcount-ok{background:var(--green2);color:var(--green3)}
+.vcount-zero{background:var(--bg3);color:var(--text3)}
+.vendas-vend-chevron{font-size:12px;color:var(--text3);transition:transform .2s}
+.vendas-vend-chevron.open{transform:rotate(180deg)}
+.vendas-vend-body{display:none;padding:0 12px 12px}
+.vendas-vend-body.open{display:block}
+.venda-detalhe{background:var(--bg3);border-radius:8px;padding:10px 12px;margin-top:8px;border-left:3px solid var(--green)}
+.venda-detalhe-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.venda-detalhe-nome{font-size:13px;font-weight:700;color:var(--text)}
+.venda-detalhe-cat{font-size:11px;font-weight:700;background:var(--green2);color:var(--green3);padding:2px 8px;border-radius:100px}
+.venda-detalhe-rows{display:flex;flex-wrap:wrap;gap:5px;margin-top:4px}
+.venda-detalhe-tag{font-size:11px;color:var(--text2);background:var(--bg2);padding:2px 8px;border-radius:100px;border:1px solid var(--border)}
+.venda-detalhe-obs{font-size:11px;color:var(--text3);margin-top:6px;font-style:italic}
+.vendas-vend-empty{font-size:12px;color:var(--text3);padding:10px 0;font-style:italic}
+
+/* ── ADMIN MODAL ── */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:200;overflow-y:auto;padding:14px}
+.overlay.show{display:flex;flex-direction:column;align-items:center}
+.overlay-panel{background:var(--bg2);border-radius:16px;width:100%;max-width:520px;overflow:hidden;margin:auto}
+.overlay-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.overlay-title{font-size:18px;font-weight:800;color:var(--text)}
+.overlay-back{padding:7px 14px;border-radius:8px;border:1.5px solid var(--border);background:var(--bg2);color:var(--text2);font-size:13px;cursor:pointer;font-family:inherit}
+.overlay-back:hover{border-color:var(--purple2);color:var(--tc)}
+.admin-box{background:var(--bg2);border-radius:var(--r);padding:14px;margin-bottom:12px;box-shadow:var(--shadow)}
+.admin-box-title{font-size:11px;font-weight:700;color:var(--purple2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px}
+.senha-box{background:var(--bg2);border-radius:var(--r);padding:20px;box-shadow:var(--shadow)}
+.senha-box h2{font-size:16px;font-weight:700;color:var(--text);margin-bottom:6px}
+.senha-box p{font-size:13px;color:var(--text3);margin-bottom:14px}
+.senha-form{display:flex;gap:8px}
+.senha-form input{flex:1;border:1.5px solid var(--border);border-radius:9px;padding:10px 12px;font-size:14px;color:var(--text);background:var(--bg3);outline:none;font-family:inherit}
+.senha-form input:focus{border-color:var(--tc)}
+.senha-btn{padding:10px 16px;border-radius:9px;border:none;background:var(--tc);color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit}
+.senha-btn:hover{opacity:.9}
+.senha-erro{font-size:12px;color:var(--red);margin-top:8px;display:none}
+/* admin inputs */
+.admin-box input,.admin-box select,.admin-box textarea{width:100%;border:1.5px solid var(--border);border-radius:9px;padding:10px 12px;font-size:13px;color:var(--text);background:var(--bg3);outline:none;margin-bottom:8px;font-family:inherit}
+.admin-box input:focus,.admin-box select:focus{border-color:var(--tc)}
+.admin-box input::placeholder{color:var(--text3)}
+.admin-add-btn{width:100%;padding:11px;border-radius:9px;border:none;background:var(--tc);color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit}
+.admin-add-btn:hover{opacity:.9}
+.vend-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)}
+.vend-row:last-child{border-bottom:none}
+.vend-nome{font-size:13px;font-weight:700;color:var(--text)}
+.vend-aba{font-size:11px;color:var(--text3);margin-top:2px}
+.vend-remove{padding:5px 11px;border-radius:7px;border:1.5px solid #ffd5d5;background:#fff5f5;color:var(--red);font-size:12px;cursor:pointer;font-family:inherit}
+.vend-remove:hover{background:#ffe0e0}
+/* context cards */
+.ctx-card{display:flex;align-items:center;gap:10px;background:var(--bg3);border:1.5px solid var(--border);border-radius:var(--rs);padding:11px 14px;cursor:pointer;font-family:inherit;text-align:left;width:100%;transition:border-color .15s;margin-bottom:8px}
+.ctx-card:hover{border-color:var(--purple2)}
+.ctx-card-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.ctx-card-name{font-size:13px;font-weight:700;color:var(--text)}
+.ctx-card-sub{font-size:11px;color:var(--text3)}
+/* admin inner tabs */
+.admin-tabs{display:flex;gap:2px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--rs);padding:3px;margin-bottom:14px}
+.admin-tab{flex:1;padding:8px 4px;border:none;background:transparent;color:var(--text3);font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;border-radius:6px;transition:all .15s;text-align:center}
+.admin-tab.active{background:var(--tc);color:#fff}
+
+/* ── TOAST / MODAL ── */
+.toast{display:none;position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%);padding:11px 22px;border-radius:10px;font-size:14px;z-index:200;font-weight:700;white-space:nowrap;box-shadow:0 4px 16px rgba(0,0,0,.2)}
+.toast.show{display:block}
+.toast-venda{background:var(--green);color:#fff}
+.toast-metrica{background:var(--tc);color:#fff}
+.toast-erro{background:var(--red);color:#fff}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:300;align-items:center;justify-content:center;padding:1rem}
+.modal-overlay.show{display:flex}
+.modal{background:var(--bg2);border-radius:16px;padding:1.5rem;max-width:320px;width:100%}
+.modal h2{font-size:16px;font-weight:700;color:var(--text);margin-bottom:8px}
+.modal p{font-size:13px;color:var(--text2);line-height:1.5;margin-bottom:1.25rem}
+.modal-btns{display:flex;gap:8px}
+.modal-cancel{flex:1;padding:10px;border-radius:8px;border:1.5px solid var(--border);background:none;font-size:13px;color:var(--text2);cursor:pointer;font-family:inherit}
+.modal-confirm{flex:1;padding:10px;border-radius:8px;border:none;background:var(--tc);color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit}
+
+/* ── LOADING / MISC ── */
+@keyframes spin{to{transform:rotate(360deg)}}
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px}
+.loading-v{text-align:center;padding:1.5rem;color:var(--text3);font-size:13px}
+.hidden{display:none}
+input[type=date]::-webkit-calendar-picker-indicator{filter:invert(.5)}
+.setup-box{background:rgba(239,159,39,.1);border:1.5px solid rgba(239,159,39,.4);border-radius:var(--rs);padding:12px 14px;margin-bottom:14px;font-size:12px;color:var(--text2);line-height:1.6}
+.setup-box strong{color:var(--amber)}
+.setup-box code{background:var(--bg3);padding:1px 5px;border-radius:4px;font-size:11px;word-break:break-all}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+
+<!-- ── TEAMS SCREEN (sem ?team=) ── -->
+<div id="teams-screen" style="display:none">
+  <div style="display:flex;flex-direction:column;align-items:center;padding:48px 16px 24px">
+    <div style="font-size:24px;font-weight:800;color:var(--tc);letter-spacing:-.5px;margin-bottom:4px">Registro<span style="opacity:.7">Diário</span></div>
+    <div style="font-size:13px;color:var(--text3);margin-bottom:32px">Selecione seu time para entrar</div>
+    <div id="teams-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px;max-width:680px;width:100%">
+      <div class="loading-v">Carregando times...</div>
+    </div>
+    <div class="topbar-r" style="margin-top:28px">
+      <button class="tbtn" style="background:var(--bg3);color:var(--text2);border-color:var(--border)" id="theme-btn-teams" onclick="toggleTheme()">🌙</button>
+      <button class="tbtn" style="background:var(--bg3);color:var(--text2);border-color:var(--border)" onclick="abrirAdmin()">🔒 Admin</button>
+    </div>
+  </div>
+</div>
+<div id="select-screen" style="display:none">
+  <div class="topbar" id="sel-topbar">
+    <span class="logo">Registro<b style="opacity:.7">Diário</b></span>
+    <div class="topbar-r">
+      <button class="tbtn" id="theme-btn-sel" onclick="toggleTheme()">🌙</button>
+      <button class="tbtn" onclick="abrirAdmin()">🔒 Admin</button>
+    </div>
+  </div>
+  <div class="select-wrap">
+    <h2>Quem está registrando?</h2>
+    <p>Selecione seu nome para acessar o registro do dia.</p>
+    <div class="vendedor-btns" id="vendedor-list"><div class="loading-v">Carregando...</div></div>
+    <div class="section-label">Progresso dos grupos</div>
+    <div class="group-progress-cards" id="group-progress-cards"><div class="loading-v">Carregando grupos...</div></div>
+  </div>
+</div>
+
+<!-- ── MAIN SCREEN ── -->
+<div id="main-content" style="display:none">
+  <div class="topbar" style="padding:0 12px">
+    <div>
+      <div style="font-size:15px;font-weight:800;color:#fff" id="hd-nome">—</div>
+      <div style="font-size:10px;color:rgba(255,255,255,.6)" id="hd-sub"></div>
+    </div>
+    <div class="topbar-r">
+      <button class="tbtn" onclick="trocarVendedor()">← Sair</button>
+      <button class="tbtn" id="theme-btn-main" onclick="toggleTheme()">🌙</button>
+      <button class="tbtn" onclick="abrirAdmin()">🔒</button>
+    </div>
+  </div>
+  <div class="date-nav" style="background:rgba(0,0,0,.18)">
+    <button onclick="changeDay(-1)">‹</button>
+    <span class="date-label" id="date-label"></span>
+    <button onclick="changeDay(1)" id="btn-next">›</button>
+  </div>
+  <div class="tabs">
+    <button class="tab on" id="tab-m" onclick="setTab('m')">📊 Métricas</button>
+    <button class="tab off" id="tab-v" onclick="setTab('v')">💰 Vendas</button>
+  </div>
+
+  <!-- ── ABA MÉTRICAS ── -->
+  <div id="body-m" style="display:none;padding:14px">
+
+    <!-- Vendor card -->
+    <div class="vendor-confirmed" style="margin-bottom:12px">
+      <div class="vendor-avatar" id="vc-avatar">?</div>
+      <div class="vendor-info">
+        <div class="vendor-name" id="vc-name">—</div>
+        <div class="vendor-code" id="vc-code">—</div>
+      </div>
+      <span class="vendor-change" onclick="trocarVendedor()">Não sou eu</span>
+    </div>
+
+    <div class="section-label">Horas faladas</div>
+
+    <!-- CLINT -->
+    <div class="card">
+      <div class="source-header"><span class="source-tag tag-clint">CLINT — CRM</span></div>
+      <div class="time-row">
+        <span class="time-lbl">h</span>
+        <input class="time-inp" type="number" id="clint-h" value="0" min="0" max="23" oninput="recalc()">
+        <span class="time-sep">:</span>
+        <span class="time-lbl">min</span>
+        <input class="time-inp" type="number" id="clint-m" value="0" min="0" max="59" oninput="recalc()">
+        <span class="time-sep">:</span>
+        <span class="time-lbl">seg</span>
+        <input class="time-inp" type="number" id="clint-s" value="0" min="0" max="59" oninput="recalc()">
+      </div>
+    </div>
+
+    <!-- 3C Plus -->
+    <div class="card">
+      <div class="source-header"><span class="source-tag tag-3c">3C Plus — Discador</span></div>
+      <div class="camp-labels">
+        <span style="flex:1.2">Campanha</span>
+        <span style="flex:1;text-align:center">h · min · seg</span>
+        <span style="width:28px"></span>
+      </div>
+      <div class="camp-list" id="camp-list"></div>
+      <button class="add-camp-btn" id="add-camp-btn" onclick="addCamp()">+ Adicionar campanha</button>
+    </div>
+
+    <!-- Total -->
+    <div class="total-box">
+      <div>
+        <div class="total-lbl">Total horas faladas</div>
+        <div class="total-detail" id="total-detail">CLINT + 0 campanhas</div>
+      </div>
+      <div>
+        <div class="total-val" id="total-display">0h 00min</div>
+        <div class="total-min" id="total-min">0 min total</div>
+      </div>
+    </div>
+
+    <div class="section-label">Indicadores do dia</div>
+    <div class="metrics-grid">
+      <div class="metric-card"><label>Atenderam</label><div class="counter"><button onclick="adj('atenderam',-1)">−</button><input type="number" id="atenderam" value="0" min="0" oninput="recalc()"><button onclick="adj('atenderam',1)">+</button></div></div>
+      <div class="metric-card"><label>Entrevista</label><div class="counter"><button onclick="adj('entrevista',-1)">−</button><input type="number" id="entrevista" value="0" min="0" oninput="recalc()"><button onclick="adj('entrevista',1)">+</button></div></div>
+      <div class="metric-card"><label>Headcounts</label><div class="counter"><button onclick="adj('headcounts',-1)">−</button><input type="number" id="headcounts" value="0" min="0" oninput="recalc()"><button onclick="adj('headcounts',1)">+</button></div></div>
+      <div class="metric-card"><label>Cross-sell</label><div class="counter"><button onclick="adj('crosssell',-1)">−</button><input type="number" id="crosssell" value="0" min="0" oninput="recalc()"><button onclick="adj('crosssell',1)">+</button></div></div>
+    </div>
+
+    <div class="section-label">Taxas calculadas</div>
+    <div class="rates">
+      <div class="rate"><div class="rate-val" id="tx-atend">0%</div><div class="rate-lbl">Atend→Entrv</div></div>
+      <div class="rate"><div class="rate-val" id="tx-head">0%</div><div class="rate-lbl">Entrv→Head</div></div>
+      <div class="rate rate-pace"><div class="rate-val" id="tx-pace">—</div><div class="rate-lbl">Pace p/ venda</div></div>
+    </div>
+
+    <div class="section-label">Taxas por período</div>
+    <div class="periodo-box">
+      <div class="periodo-inputs">
+        <div class="periodo-field"><label>De</label><input type="date" id="periodo-inicio"></div>
+        <div class="periodo-field"><label>Até</label><input type="date" id="periodo-fim"></div>
+        <button class="periodo-search-btn" onclick="carregarPeriodo()">Buscar</button>
+      </div>
+      <div id="periodo-content" class="loading-v" style="display:none">Carregando...</div>
+      <div id="periodo-data" style="display:none">
+        <div class="periodo-stats">
+          <div class="periodo-stat"><div class="pstat-val" id="p-horas">—</div><div class="pstat-lbl">Horas</div></div>
+          <div class="periodo-stat"><div class="pstat-val" id="p-atend">—</div><div class="pstat-lbl">Atenderam</div></div>
+          <div class="periodo-stat"><div class="pstat-val" id="p-entrv">—</div><div class="pstat-lbl">Entrevistas</div></div>
+          <div class="periodo-stat"><div class="pstat-val" id="p-head">—</div><div class="pstat-lbl">Headcounts</div></div>
+        </div>
+        <div class="periodo-rates">
+          <div class="periodo-rate"><span class="prate-lbl">Atend → Entrv</span><span class="prate-val" id="p-txatend">—</span></div>
+          <div class="periodo-rate"><span class="prate-lbl">Entrv → Head</span><span class="prate-val" id="p-txhead">—</span></div>
+          <div class="periodo-rate periodo-rate-pace"><span class="prate-lbl">Pace por venda</span><span class="prate-val" id="p-pace">—</span></div>
+        </div>
+        <div class="periodo-dias" id="p-dias"></div>
+      </div>
+    </div>
+
+    <div class="section-label">Comentários</div>
+    <div class="comment-area card" style="padding:0;box-shadow:none;background:transparent;margin-bottom:12px">
+      <textarea id="comentario" rows="3" placeholder="Como foi o dia? Dificuldades, destaques..."></textarea>
+    </div>
+
+    <div class="saved-banner" id="saved-banner">
+      <span id="saved-time">Métricas salvas ✓</span>
+      <button onclick="pedirEdicao()">Editar</button>
+    </div>
+    <div class="submit-hint" id="submit-hint">Salva horas, métricas e comentários</div>
+    <button class="save-btn-m" id="submit-btn" onclick="salvarMetricas()">Salvar métricas do dia</button>
+
+    <!-- ── REC (só aparece se vendedor habilitado) ── -->
+    <div id="rec-section" style="display:none;margin-top:18px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+        <div style="flex:1;height:1px;background:var(--border)"></div>
+        <span style="font-size:11px;font-weight:700;color:#E87722;text-transform:uppercase;letter-spacing:.07em;white-space:nowrap">📞 Recuperação (REC)</span>
+        <div style="flex:1;height:1px;background:var(--border)"></div>
+      </div>
+      <div class="metrics-grid">
+        <div class="metric-card" style="border-color:rgba(232,119,34,.3)">
+          <label style="color:#E87722">Pag. Rec.</label>
+          <div class="counter"><button onclick="adjRec('r-pagRec',-1)">−</button><input type="number" id="r-pagRec" value="0" min="0"><button onclick="adjRec('r-pagRec',1)">+</button></div>
+        </div>
+        <div class="metric-card" style="border-color:rgba(232,119,34,.3)">
+          <label style="color:#E87722">Abandono</label>
+          <div class="counter"><button onclick="adjRec('r-abandono',-1)">−</button><input type="number" id="r-abandono" value="0" min="0"><button onclick="adjRec('r-abandono',1)">+</button></div>
+        </div>
+        <div class="metric-card" style="border-color:rgba(232,119,34,.3)">
+          <label style="color:#E87722">Fale c/ Esp.</label>
+          <div class="counter"><button onclick="adjRec('r-faleEsp',-1)">−</button><input type="number" id="r-faleEsp" value="0" min="0"><button onclick="adjRec('r-faleEsp',1)">+</button></div>
+        </div>
+        <div class="metric-card" style="border-color:rgba(232,119,34,.3)">
+          <label style="color:#E87722">Captação</label>
+          <div class="counter"><button onclick="adjRec('r-captacao',-1)">−</button><input type="number" id="r-captacao" value="0" min="0"><button onclick="adjRec('r-captacao',1)">+</button></div>
+        </div>
+        <div class="metric-card" style="border-color:rgba(232,119,34,.3)">
+          <label style="color:#E87722">Inválidos</label>
+          <div class="counter"><button onclick="adjRec('r-invalidos',-1)">−</button><input type="number" id="r-invalidos" value="0" min="0"><button onclick="adjRec('r-invalidos',1)">+</button></div>
+        </div>
+        <div class="metric-card" style="border-color:rgba(232,119,34,.3)">
+          <label style="color:#E87722">Headcounts</label>
+          <div class="counter"><button onclick="adjRec('r-headcounts',-1)">−</button><input type="number" id="r-headcounts" value="0" min="0"><button onclick="adjRec('r-headcounts',1)">+</button></div>
+        </div>
+      </div>
+      <div class="saved-banner" id="saved-banner-rec">
+        <span id="saved-time-rec">REC salvo ✓</span>
+        <button onclick="pedirEdicaoRec()">Editar</button>
+      </div>
+      <button class="save-btn-m" id="submit-btn-rec" style="background:#E87722" onclick="salvarMetricasRec()">Salvar métricas REC</button>
+    </div>
+  </div>
+
+  <!-- ── ABA VENDAS ── -->
+  <div id="body-v" style="display:none;padding:14px">
+    <div class="vendas-count">
+      <span class="vendas-count-lbl">Vendas realizadas hoje</span>
+      <span class="vendas-badge badge-zero" id="vendas-badge">0 vendas</span>
+    </div>
+    <div id="vendas-list">
+      <div class="empty-vendas" id="empty-msg">Nenhuma venda ainda.<br>Assim que fechar uma, registre aqui.</div>
+    </div>
+    <button class="add-venda-btn" onclick="addVenda()">
+      <span style="font-size:20px;line-height:1">+</span> Registrar nova venda
+    </button>
+  </div>
+</div>
+
+<!-- ── ADMIN MODAL ── -->
+<div class="overlay" id="admin-overlay" onclick="overlayClickOutside(event)">
+  <div class="overlay-panel">
+    <div class="overlay-header" style="padding:14px 16px;border-bottom:1px solid var(--border)">
+      <span class="overlay-title" id="overlay-title">⚙ Admin</span>
+      <button class="overlay-back" onclick="fecharAdmin()">✕ Fechar</button>
+    </div>
+
+  <!-- Senha -->
+  <div id="senha-screen" style="padding:20px">
+    <h2 style="font-size:16px;font-weight:700;color:var(--text);margin-bottom:6px">Acesso restrito</h2>
+    <p style="font-size:13px;color:var(--text3);margin-bottom:14px">Digite a senha para acessar o painel.</p>
+    <div class="senha-form">
+      <input type="password" id="senha-input" placeholder="Senha" onkeydown="if(event.key==='Enter')verificarSenha()" style="flex:1;border:1.5px solid var(--border);border-radius:9px;padding:10px 12px;font-size:14px;color:var(--text);background:var(--bg3);outline:none;font-family:inherit">
+      <button class="senha-btn" onclick="verificarSenha()">Entrar</button>
+    </div>
+    <div class="senha-erro" id="senha-erro" style="font-size:12px;color:var(--red);margin-top:8px;display:none">Senha incorreta.</div>
+  </div>
+
+  <!-- Contexto -->
+  <div id="ctx-screen" class="hidden" style="padding:14px">
+    <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:12px">Selecionar contexto</div>
+    <div id="ctx-list"></div>
+  </div>
+
+  <!-- Painel Time -->
+  <div id="admin-team-panel" class="hidden">
+    <div class="admin-tabs" id="team-tabs" style="margin:0 14px 0;padding-top:4px"></div>
+    <div id="team-panel-body" style="padding:14px;max-height:70vh;overflow-y:auto"></div>
+  </div>
+
+  <!-- Painel Global -->
+  <div id="admin-global-panel" class="hidden">
+    <div class="admin-tabs" id="global-tabs"></div>
+    <div id="global-panel-body" style="padding:14px;max-height:70vh;overflow-y:auto"></div>
+  </div>
+  </div><!-- /overlay-panel -->
+</div><!-- /admin-overlay -->
+
+<!-- MODAL editar métricas -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <h2>Editar métricas?</h2>
+    <p>As métricas já foram salvas. Ao editar e salvar novamente, os dados serão sobrescritos.</p>
+    <div class="modal-btns">
+      <button class="modal-cancel" onclick="fecharModal()">Cancelar</button>
+      <button class="modal-confirm" onclick="liberarEdicao()">Sim, editar</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════════════════
+// CONFIG
+// ══════════════════════════════════════════════════════
+const API = 'https://registro-diario-api-0zsp.onrender.com';
+const QS  = new URLSearchParams(window.location.search);
+const TEAM_ID = QS.get('team') || '';
+const CATEGORIAS = ['Normal/Essential','VIP','Upgrade'];
+
+// State
+let vendedores   = [];
+let grupos       = [];
+let immersions   = [];
+let metaPeriod   = { inicio: '', fim: '' };
+let vendedorAtual = null;
+let grupoAtual    = null;
+let currentDate   = new Date();
+let campId = 0, vendaId = 0, vendaCount = 0;
+let adminSenha = sessionStorage.getItem('rd_admin') || '';
+let adminCtx   = null;
+let locked     = false;
+
+const days   = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+const months = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+
+// ══════════════════════════════════════════════════════
+// THEME
+// ══════════════════════════════════════════════════════
+function toggleTheme() {
+  const isDark = document.body.classList.toggle('dark');
+  localStorage.setItem('rd_theme', isDark ? 'dark' : 'light');
+  document.querySelectorAll('#theme-btn-sel,#theme-btn-main,#theme-btn-teams').forEach(b => b.textContent = isDark ? '☀️' : '🌙');
+}
+function applyTheme() {
+  const saved = localStorage.getItem('rd_theme') || 'light';
+  if (saved === 'dark') {
+    document.body.classList.add('dark');
+    document.querySelectorAll('#theme-btn-sel,#theme-btn-main,#theme-btn-teams').forEach(b => b.textContent = '☀️');
+  }
+}
+
+// ══════════════════════════════════════════════════════
+// UTILS
+// ══════════════════════════════════════════════════════
+function pctColor(p) { return p >= 100 ? 'var(--green)' : p >= 60 ? 'var(--amber)' : 'var(--red)'; }
+function isoToBR(iso) { if (!iso) return '—'; const [y,m,d]=iso.split('-'); return `${d}/${m}/${y}`; }
+function todayISO() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function dateToISO(d) {
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function dateToDataBR(d) {
+  const dd = String(d.getDate()).padStart(2,'0');
+  const mm = String(d.getMonth()+1).padStart(2,'0');
+  const yy = d.getFullYear();
+  return `${dd}/${mm}/${yy}`;
+}
+function toISO(d) { if (!d) return ''; const [dd,mm,yy]=d.split('/'); return `${yy}-${mm}-${dd}`; }
+function monthStartISO() { const n=new Date(); return `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}-01`; }
+function formatDateLabel(d) {
+  return `${days[d.getDay()]}, ${d.getDate()} de ${months[d.getMonth()]} de ${d.getFullYear()}`;
+}
+function setTeamColor(c) {
+  // team color used only for group accents — main UI stays purple
+  document.documentElement.style.setProperty('--team-color', c || '#4B2D8F');
+}
+function dayColor(d) { if(d<0)return'var(--text3)';if(d===0)return'var(--blue,#4c9fff)';if(d<=7)return'var(--amber)';return'var(--green)'; }
+function dayLabel(d) { if(d<0)return'Encerrada';if(d===0)return'HOJE!';return d===1?'1 dia':`${d} dias`; }
+
+async function api(path, opts={}) {
+  const r = await fetch(API + path, opts);
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(j.erro || `HTTP ${r.status}`);
+  return j;
+}
+function ah() { return { 'Content-Type':'application/json', 'x-admin-password': adminSenha }; }
+
+function showToast(msg, cls) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'toast ' + cls + ' show';
+  setTimeout(() => t.className = 'toast', 3000);
+}
+
+// ══════════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════════
+async function showTeamsScreen() {
+  applyTheme();
+  document.getElementById('teams-screen').style.display  = 'block';
+  document.getElementById('select-screen').style.display = 'none';
+  document.getElementById('main-content').style.display  = 'none';
+  try {
+    const teams = await api('/api/teams');
+    document.getElementById('teams-grid').innerHTML = teams.map(t => `
+      <a href="?team=${t.id}" style="background:var(--bg2);border:2px solid ${t.color}30;border-radius:14px;padding:18px;cursor:pointer;transition:all .2s;text-decoration:none;display:block"
+        onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 24px rgba(0,0,0,.12)'"
+        onmouseout="this.style.transform='';this.style.boxShadow=''">
+        <div style="width:34px;height:34px;border-radius:50%;background:${t.color}15;border:2px solid ${t.color}40;display:flex;align-items:center;justify-content:center;margin-bottom:12px">
+          <div style="width:12px;height:12px;border-radius:50%;background:${t.color}"></div>
+        </div>
+        <div style="font-size:15px;font-weight:800;color:var(--text);margin-bottom:2px">${t.teamName}</div>
+        <div style="font-size:11px;color:var(--text3);margin-bottom:12px">${t.name}</div>
+        <div style="font-size:12px;font-weight:700;color:${t.color}">Entrar →</div>
+      </a>`).join('');
+  } catch(e) {
+    document.getElementById('teams-grid').innerHTML = `<div class="loading-v">Erro ao carregar: ${e.message}</div>`;
+  }
+}
+
+async function init() {
+  applyTheme();
+  if (!TEAM_ID) { showTeamsScreen(); return; }
+
+  try {
+    const [cfg, vds, grs] = await Promise.all([
+      api('/api/config'),
+      api(`/vendedores?team=${TEAM_ID}`),
+      api(`/api/grupos?team=${TEAM_ID}`),
+    ]);
+    immersions = cfg.immersions || [];
+    metaPeriod = cfg.meta?.periodoInicio ? { inicio: cfg.meta.periodoInicio, fim: cfg.meta.periodoFim||todayISO() } : { inicio: monthStartISO(), fim: todayISO() };
+    vendedores = vds.filter(v => !v.exitDate);
+    grupos     = grs;
+
+    // Team color from localStorage (cached)
+    const teams = await api('/api/teams');
+    const team  = teams.find(t => t.id === TEAM_ID);
+    if (team) setTeamColor(team.color);
+
+    // Check saved vendor
+    const saved = localStorage.getItem(`rd_v_${TEAM_ID}`);
+    if (saved) {
+      const v = vendedores.find(x => x.code === saved);
+      if (v) { vendedorAtual = v; grupoAtual = grupos.find(g=>(g.vendorCodes||[]).includes(v.code))||null; }
+    }
+
+    if (vendedorAtual) {
+      // Não entra automaticamente - sempre mostra seleção primeiro com destaque
+      showSelectScreen();
+    } else {
+      showSelectScreen();
+    }
+  } catch(e) {
+    document.body.innerHTML = `<div style="padding:40px;text-align:center;color:#888">Erro ao carregar: ${e.message}<br><br><a href="?" style="color:var(--tc)">Tentar novamente</a></div>`;
+  }
+}
+
+// ══════════════════════════════════════════════════════
+// SELECT SCREEN
+// ══════════════════════════════════════════════════════
+function showSelectScreen() {
+  // Telas
+  document.getElementById('teams-screen').style.display   = 'none';
+  document.getElementById('select-screen').style.display  = 'block';
+  document.getElementById('main-content').style.display   = 'none';
+
+  const saved = vendedorAtual;
+  const list  = document.getElementById('vendedor-list');
+  list.innerHTML = (saved ? `
+    <div style="background:var(--purple3);border:2px solid var(--purple2);border-radius:12px;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+      <div>
+        <div style="font-size:11px;font-weight:700;color:var(--purple2);margin-bottom:2px">ÚLTIMO ACESSO</div>
+        <div style="font-size:14px;font-weight:800;color:var(--text)">${saved.name}</div>
+      </div>
+      <button onclick="confirmarVendedor('${saved.code}')" style="background:var(--tc);color:#fff;border:none;border-radius:9px;padding:9px 16px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">Continuar →</button>
+    </div>
+    <div style="font-size:11px;color:var(--text3);text-align:center;padding:8px 0 4px">ou escolha outro:</div>
+  ` : '') + vendedores.filter(v => !saved || v.code !== saved.code).map(v => `
+    <button class="vendedor-btn" onclick="confirmarVendedor('${v.code}')">
+      <span class="vendedor-btn-nome">${v.name}</span>
+      <span class="vendedor-btn-cod">${v.code}</span>
+    </button>`).join('');
+
+  renderGroupProgress();
+}
+
+async function renderGroupProgress() {
+  const el = document.getElementById('group-progress-cards');
+  if (!grupos.length) { el.innerHTML = '<div class="loading-v">Sem grupos configurados.</div>'; return; }
+  el.innerHTML = grupos.map(g=>`<div class="gpc" style="border-left-color:${g.color||'var(--tc)'}">
+    <div class="gpc-header"><div class="gpc-dot" style="background:${g.color||'var(--tc)'}"></div><div class="gpc-name">${g.name}</div><div class="gpc-pct" id="gpct-${g.id}">...</div></div>
+    <div class="prog-bar"><div class="prog-fill" id="gpf-${g.id}" style="width:0%;background:${g.color||'var(--tc)'}"></div></div>
+    <div class="gpc-members" id="gpm-${g.id}"><div style="font-size:12px;color:var(--text3)">Carregando...</div></div>
+    ${(immersions.filter(im=>(g.immersionIds||[]).includes(im.id))).length>0?`
+    <div class="gpc-imm">${immersions.filter(im=>(g.immersionIds||[]).includes(im.id)).map(im=>`
+      <span class="gpc-imm-tag" style="color:${dayColor(im.daysUntil)}">📍 ${im.name} · ${dayLabel(im.daysUntil)}</span>`).join('')}
+    </div>`:''}
+  </div>`).join('');
+
+  // Load progress async per group
+  for (const g of grupos) {
+    try {
+      const ini = g.periodoInicio || metaPeriod.inicio;
+      const fim = g.periodoFim    || metaPeriod.fim;
+      const data = await api(`/api/grupo-progresso?team=${TEAM_ID}&groupId=${g.id}&inicio=${encodeURIComponent(isoToBR(ini))}&fim=${encodeURIComponent(isoToBR(fim))}`);
+      const pct = data.pct || 0;
+      const pfEl = document.getElementById(`gpf-${g.id}`);
+      const pctEl = document.getElementById(`gpct-${g.id}`);
+      const memEl = document.getElementById(`gpm-${g.id}`);
+      if (pfEl) { pfEl.style.width = Math.min(pct,100)+'%'; pfEl.style.background = pctColor(pct); }
+      if (pctEl) { pctEl.textContent = `${data.totalHC}/${data.hcGoal} HC (${pct}%)`; pctEl.style.color = pctColor(pct); }
+      if (memEl) memEl.innerHTML = (data.members||[]).map(m=>`
+        <div class="gpc-member-row">
+          <div class="gpc-member-name" title="${m.name}">${m.name.split(' ')[0]}</div>
+          <div class="gpc-member-bar"><div class="gpc-member-fill" style="width:${Math.min(m.pct,100)}%;background:${pctColor(m.pct)}"></div></div>
+          <div class="gpc-member-val">${m.headcounts}/${m.hcMeta}</div>
+        </div>`).join('');
+    } catch(e) {
+      const pctEl = document.getElementById(`gpct-${g.id}`);
+      if (pctEl) pctEl.textContent = '—';
+    }
+  }
+}
+
+async function confirmarVendedor(code) {
+  const v = vendedores.find(x => x.code === code);
+  if (!v) return;
+  // Recarrega dados frescos do servidor (pega hasRec atualizado)
+  try {
+    const fresh = await api(`/vendedores?team=${TEAM_ID}`);
+    vendedores = fresh.filter(x => !x.exitDate);
+  } catch(e) { /* usa dados em cache se falhar */ }
+  vendedorAtual = vendedores.find(x => x.code === code) || v;
+  grupoAtual    = grupos.find(g => (g.vendorCodes||[]).includes(code)) || null;
+  localStorage.setItem(`rd_v_${TEAM_ID}`, code);
+  showMain();
+}
+
+function trocarVendedor() {
+  vendedorAtual = null; grupoAtual = null;
+  localStorage.removeItem(`rd_v_${TEAM_ID}`);
+  resetForm();
+  showSelectScreen();
+}
+
+// ══════════════════════════════════════════════════════
+// MAIN SCREEN
+// ══════════════════════════════════════════════════════
+function showMain() {
+  // Esconde outras telas com inline style
+  document.getElementById('teams-screen').style.display  = 'none';
+  document.getElementById('select-screen').style.display = 'none';
+
+  // Mostra main com inline style
+  document.getElementById('main-content').style.display = 'block';
+
+  // Tabs: força métricas
+  document.getElementById('body-m').style.display = 'block';
+  document.getElementById('body-v').style.display = 'none';
+  document.getElementById('tab-m').className = 'tab on';
+  document.getElementById('tab-v').className  = 'tab off';
+
+  // Header
+  document.getElementById('hd-nome').textContent   = vendedorAtual.name;
+  document.getElementById('hd-sub').textContent    = vendedorAtual.code + (grupoAtual ? ` · ${grupoAtual.name}` : '');
+  document.getElementById('vc-avatar').textContent = vendedorAtual.name.charAt(0);
+  document.getElementById('vc-name').textContent   = vendedorAtual.name;
+  document.getElementById('vc-code').textContent   = vendedorAtual.code;
+
+  // REC
+  document.getElementById('rec-section').style.display = vendedorAtual.hasRec ? 'block' : 'none';
+
+  // Período
+  document.getElementById('periodo-inicio').value = metaPeriod.inicio || '';
+  document.getElementById('periodo-fim').value    = metaPeriod.fim    || '';
+
+  updateDateLabel();
+  resetForm();
+}
+
+function updateDateLabel() {
+  const lbl = document.getElementById('date-label');
+  const today = new Date(); today.setHours(0,0,0,0);
+  const cd = new Date(currentDate); cd.setHours(0,0,0,0);
+  const diff = Math.round((cd-today)/86400000);
+  const suffix = diff===0?' (Hoje)':diff===-1?' (Ontem)':'';
+  lbl.textContent = formatDateLabel(currentDate) + suffix;
+  document.getElementById('btn-next').disabled = diff >= 0;
+}
+
+function changeDay(d) {
+  const nd = new Date(currentDate);
+  nd.setDate(nd.getDate() + d);
+  const today = new Date(); today.setHours(23,59,59,999);
+  if (nd > today) return;
+  currentDate = nd;
+  updateDateLabel();
+  resetForm();
+}
+
+function setTab(t) {
+  ['m','v'].forEach(x => {
+    const tabBtn  = document.getElementById('tab-'+x);
+    const tabBody = document.getElementById('body-'+x);
+    if (x === t) {
+      tabBtn.className  = 'tab on';
+      tabBody.style.display = 'block';
+    } else {
+      tabBtn.className  = 'tab off';
+      tabBody.style.display = 'none';
+    }
+  });
+}
+
+// ══════════════════════════════════════════════════════
+// HORAS (CLINT + 3C Plus)
+// ══════════════════════════════════════════════════════
+function addCamp() {
+  const id = ++campId;
+  const item = document.createElement('div');
+  item.className = 'camp-item'; item.id = `camp-${id}`;
+  item.innerHTML = `
+    <input class="camp-name" type="text" placeholder="Nome da campanha" id="cn-${id}">
+    <div class="ctime">
+      <input type="number" id="ch-${id}" value="0" min="0" max="23" oninput="recalc()">
+      <span>h</span>
+      <input type="number" id="cm-${id}" value="0" min="0" max="59" oninput="recalc()">
+      <span>m</span>
+      <input type="number" id="cs-${id}" value="0" min="0" max="59" oninput="recalc()">
+      <span>s</span>
+    </div>
+    <button class="del-btn" onclick="removeCamp(${id})" title="Remover">×</button>`;
+  document.getElementById('camp-list').appendChild(item);
+  recalc();
+}
+
+function removeCamp(id) {
+  const el = document.getElementById(`camp-${id}`);
+  if (el) { el.remove(); recalc(); }
+}
+
+function getTotalSeconds() {
+  const clint = (parseInt(document.getElementById('clint-h').value)||0)*3600
+              + (parseInt(document.getElementById('clint-m').value)||0)*60
+              + (parseInt(document.getElementById('clint-s').value)||0);
+  let camp3c = 0;
+  document.querySelectorAll('.camp-item').forEach(el => {
+    const id = el.id.split('-')[1];
+    camp3c += (parseInt(document.getElementById(`ch-${id}`)?.value)||0)*3600
+            + (parseInt(document.getElementById(`cm-${id}`)?.value)||0)*60
+            + (parseInt(document.getElementById(`cs-${id}`)?.value)||0);
+  });
+  return { clint, camp3c, total: clint+camp3c };
+}
+
+function secsToHMS(s) {
+  const h=Math.floor(s/3600), m=Math.floor((s%3600)/60), sec=s%60;
+  return `${h}:${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
+}
+
+function recalc() {
+  const { clint, camp3c, total } = getTotalSeconds();
+  const th = Math.floor(total/3600), tm = Math.floor((total%3600)/60);
+  const campCount = document.querySelectorAll('.camp-item').length;
+  document.getElementById('total-display').textContent = `${th}h ${String(tm).padStart(2,'0')}min`;
+  document.getElementById('total-min').textContent = `${Math.floor(total/60)} min total`;
+  document.getElementById('total-detail').textContent = `CLINT + ${campCount} campanha${campCount!==1?'s':''}`;
+
+  const at = parseInt(document.getElementById('atenderam').value)||0;
+  const en = parseInt(document.getElementById('entrevista').value)||0;
+  const hc = parseInt(document.getElementById('headcounts').value)||0;
+  document.getElementById('tx-atend').textContent = at>0 ? Math.round(en/at*100)+'%' : '0%';
+  document.getElementById('tx-head').textContent  = en>0 ? Math.round(hc/en*100)+'%' : '0%';
+  if (hc>0 && total>0) {
+    const spv = Math.round(total/hc);
+    const ph=Math.floor(spv/3600), pm=Math.floor((spv%3600)/60);
+    document.getElementById('tx-pace').textContent = ph>0 ? `${ph}h${String(pm).padStart(2,'0')}m` : `${pm}min`;
+  } else {
+    document.getElementById('tx-pace').textContent = '—';
+  }
+}
+
+function adj(id, delta) {
+  const el = document.getElementById(id);
+  const v = Math.max(0, (parseInt(el.value)||0)+delta);
+  el.value = v; recalc();
+}
+
+// ══════════════════════════════════════════════════════
+// SALVAR MÉTRICAS
+// ══════════════════════════════════════════════════════
+function resetForm() {
+  locked = false;
+  document.getElementById('clint-h').value = 0;
+  document.getElementById('clint-m').value = 0;
+  document.getElementById('clint-s').value = 0;
+  document.getElementById('camp-list').innerHTML = '';
+  campId = 0;
+  ['atenderam','entrevista','headcounts','crosssell'].forEach(id => { const el=document.getElementById(id); if(el)el.value=0; });
+  document.getElementById('comentario').value = '';
+  document.getElementById('saved-banner').classList.remove('show');
+  document.getElementById('submit-hint').style.display = '';
+  document.getElementById('submit-btn').disabled = false;
+  // Reset REC
+  lockedRec = false;
+  ['r-pagRec','r-abandono','r-faleEsp','r-captacao','r-invalidos','r-headcounts']
+    .forEach(id => { const el=document.getElementById(id); if(el) el.value=0; });
+  document.getElementById('saved-banner-rec')?.classList.remove('show');
+  const btnRec = document.getElementById('submit-btn-rec');
+  if (btnRec) { btnRec.disabled=false; btnRec.textContent='Salvar métricas REC'; }
+  document.querySelectorAll('#rec-section .counter button, #rec-section .counter input')
+    .forEach(el => el.disabled = false);
+  recalc();
+}
+
+function pedirEdicao() { document.getElementById('modal').classList.add('show'); }
+function fecharModal() { document.getElementById('modal').classList.remove('show'); }
+function liberarEdicao() {
+  fecharModal(); locked = false;
+  document.getElementById('submit-btn').disabled = false;
+  document.getElementById('saved-banner').classList.remove('show');
+  document.getElementById('submit-hint').style.display='';
+  setEditable(true);
+}
+function setEditable(on) {
+  document.querySelectorAll('.time-inp,.camp-name,.ctime input,.counter input,#comentario').forEach(el => el.disabled = !on);
+  document.querySelectorAll('.counter button,.add-camp-btn,.del-btn').forEach(el => el.disabled = !on);
+}
+
+async function salvarMetricas() {
+  if (locked) return;
+  const btn = document.getElementById('submit-btn');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Salvando...';
+  const { total } = getTotalSeconds();
+  const horasFaladas = secsToHMS(total);
+  const dataBR = dateToDataBR(currentDate);
+  try {
+    await api('/salvar-metricas', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({
+      team: TEAM_ID,
+      aba: vendedorAtual.crmTab,
+      data: dataBR,
+      horasFaladas,
+      atenderam:          parseInt(document.getElementById('atenderam').value)||0,
+      entrevistaCompleta: parseInt(document.getElementById('entrevista').value)||0,
+      headcounts:         parseInt(document.getElementById('headcounts').value)||0,
+      crossSell:          parseInt(document.getElementById('crosssell').value)||0,
+      comentarios:        document.getElementById('comentario').value||'',
+    })});
+    locked = true;
+    document.getElementById('saved-banner').classList.add('show');
+    document.getElementById('saved-time').textContent = `Métricas salvas às ${new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})} ✓`;
+    document.getElementById('submit-hint').style.display = 'none';
+    setEditable(false);
+    showToast('Métricas salvas!','toast-metrica');
+  } catch(e) {
+    showToast('Erro: '+e.message,'toast-erro');
+    btn.disabled = false;
+  }
+  btn.innerHTML = 'Salvar métricas do dia'; btn.disabled = locked;
+}
+
+// ══════════════════════════════════════════════════════
+// MÉTRICAS REC
+// ══════════════════════════════════════════════════════
+let lockedRec = false;
+
+function adjRec(id, delta) {
+  const el = document.getElementById(id);
+  el.value = Math.max(0, (parseInt(el.value)||0) + delta);
+}
+
+function pedirEdicaoRec() {
+  lockedRec = false;
+  document.getElementById('submit-btn-rec').disabled = false;
+  document.getElementById('saved-banner-rec').classList.remove('show');
+  document.querySelectorAll('#rec-section .counter button, #rec-section .counter input')
+    .forEach(el => el.disabled = false);
+}
+
+async function salvarMetricasRec() {
+  if (lockedRec) return;
+  const btn = document.getElementById('submit-btn-rec');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Salvando...';
+  const dataBR = dateToDataBR(currentDate);
+  try {
+    await api('/salvar-metricas-rec', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({
+      team:         TEAM_ID,
+      aba:          vendedorAtual.crmTab,
+      data: dataBR,
+      pagRec:       parseInt(document.getElementById('r-pagRec').value)||0,
+      abandono:     parseInt(document.getElementById('r-abandono').value)||0,
+      faleEsp:      parseInt(document.getElementById('r-faleEsp').value)||0,
+      captacao:     parseInt(document.getElementById('r-captacao').value)||0,
+      invalidos:    parseInt(document.getElementById('r-invalidos').value)||0,
+      headcountsRec:parseInt(document.getElementById('r-headcounts').value)||0,
+    })});
+    lockedRec = true;
+    document.getElementById('saved-banner-rec').classList.add('show');
+    document.getElementById('saved-time-rec').textContent =
+      `REC salvo às ${new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})} ✓`;
+    document.querySelectorAll('#rec-section .counter button, #rec-section .counter input')
+      .forEach(el => el.disabled = true);
+    showToast('REC salvo!','toast-metrica');
+  } catch(e) { showToast('Erro: '+e.message,'toast-erro'); }
+  btn.innerHTML = 'Salvar métricas REC'; btn.disabled = lockedRec;
+}
+
+// ══════════════════════════════════════════════════════
+// TAXAS POR PERÍODO
+// ══════════════════════════════════════════════════════
+async function carregarPeriodo() {
+  const ini = document.getElementById('periodo-inicio').value;
+  const fim = document.getElementById('periodo-fim').value;
+  if (!ini||!fim) { showToast('Selecione as datas','toast-erro'); return; }
+  document.getElementById('periodo-content').style.display='block';
+  document.getElementById('periodo-data').style.display='none';
+  try {
+    const d = await api(`/taxas-periodo?team=${TEAM_ID}&aba=${encodeURIComponent(vendedorAtual.crmTab)}&inicio=${encodeURIComponent(isoToBR(ini))}&fim=${encodeURIComponent(isoToBR(fim))}`);
+    document.getElementById('p-horas').textContent  = d.totalHoras;
+    document.getElementById('p-atend').textContent  = d.totalAtenderam;
+    document.getElementById('p-entrv').textContent  = d.totalEntrevistas;
+    document.getElementById('p-head').textContent   = d.totalHeadcounts;
+    document.getElementById('p-txatend').textContent= d.txAtend;
+    document.getElementById('p-txhead').textContent = d.txHead;
+    document.getElementById('p-pace').textContent   = d.pace;
+    document.getElementById('p-dias').textContent   = `${d.diasComDados} dia${d.diasComDados!==1?'s':''} com dados`;
+    document.getElementById('periodo-content').style.display='none';
+    document.getElementById('periodo-data').style.display='block';
+  } catch(e) {
+    document.getElementById('periodo-content').textContent='Erro: '+e.message;
+  }
+}
+
+// ══════════════════════════════════════════════════════
+// VENDAS
+// ══════════════════════════════════════════════════════
+function populateVendasEventos() {
+  // Called when building venda form
+}
+
+function getEventosOptions() {
+  const opts = immersions.filter(im=>!im.isPast).map(im=>`<option value="${im.name}">${im.name}</option>`).join('');
+  return `<option value="">Selecione o evento...</option>${opts}<option value="Outro">Outro</option>`;
+}
+
+function addVenda() {
+  const dataBR = dateToDataBR(currentDate);
+  const id = ++vendaId;
+  const emptyMsg = document.getElementById('empty-msg');
+  if (emptyMsg) emptyMsg.remove();
+
+  const item = document.createElement('div');
+  item.className = 'venda-item'; item.id = `venda-${id}`;
+  item.innerHTML = `
+    <div class="venda-collapsed" onclick="toggleVenda(${id})">
+      <div class="venda-dot unsaved" id="vdot-${id}"></div>
+      <div class="venda-collapsed-info">
+        <div class="venda-nome" id="vnome-${id}">Nova venda</div>
+        <div class="venda-meta" id="vmeta-${id}">${dataBR}</div>
+      </div>
+      <div class="venda-actions" onclick="event.stopPropagation()">
+        <button class="edit-btn editing" id="vedit-${id}" onclick="toggleVenda(${id})">▲ Fechar</button>
+        <button class="venda-del-sm" onclick="removerVenda(${id})">×</button>
+      </div>
+    </div>
+    <div class="venda-expanded open" id="vexp-${id}">
+      <div style="padding-top:12px">
+        <div class="field-row"><label>Nome do cliente</label><input type="text" id="vcli-${id}" placeholder="Nome completo" oninput="atualizarVendaTitulo(${id})"></div>
+        <div class="field-row"><label>Evento / Imersão</label><select id="vevt-${id}">${getEventosOptions()}</select></div>
+        <div class="field-2col">
+          <div class="field-row"><label>Categoria</label><select id="vcat-${id}"><option value="">Selecione...</option>${CATEGORIAS.map(c=>`<option>${c}</option>`).join('')}</select></div>
+          <div class="field-row"><label>Headcounts</label><input type="number" id="vhc-${id}" value="1" min="1"></div>
+        </div>
+        <div class="field-row"><label>E-mail</label><input type="email" id="vmail-${id}" placeholder="email@exemplo.com"></div>
+        <div class="field-row"><label>Link do cliente</label><input type="url" id="vlink-${id}" placeholder="https://..."></div>
+        <div class="field-row"><label>Observações</label><textarea id="vobs-${id}" rows="2" placeholder="Detalhes adicionais..."></textarea></div>
+        <button class="save-btn-v" onclick="salvarVenda(${id})">Salvar venda</button>
+      </div>
+    </div>`;
+  document.getElementById('vendas-list').appendChild(item);
+  vendaCount++;
+  atualizarBadge();
+}
+
+function atualizarVendaTitulo(id) {
+  const cli = document.getElementById(`vcli-${id}`)?.value.trim();
+  document.getElementById(`vnome-${id}`).textContent = cli || 'Nova venda';
+}
+
+function toggleVenda(id) {
+  const exp = document.getElementById(`vexp-${id}`);
+  const btn = document.getElementById(`vedit-${id}`);
+  const open = exp.classList.toggle('open');
+  btn.textContent = open ? '▲ Fechar' : '▼ Abrir';
+  btn.className = 'edit-btn' + (open ? ' editing' : '');
+}
+
+function removerVenda(id) {
+  if (!confirm('Remover esta venda?')) return;
+  const el = document.getElementById(`venda-${id}`);
+  if (el) el.remove();
+  vendaCount = Math.max(0, vendaCount-1);
+  atualizarBadge();
+  if (!document.querySelector('.venda-item')) {
+    const list = document.getElementById('vendas-list');
+    list.innerHTML = '<div class="empty-vendas" id="empty-msg">Nenhuma venda ainda.<br>Assim que fechar uma, registre aqui.</div>';
+  }
+}
+
+function atualizarBadge() {
+  const b = document.getElementById('vendas-badge');
+  b.textContent = `${vendaCount} venda${vendaCount!==1?'s':''}`;
+  b.className = 'vendas-badge ' + (vendaCount>0?'badge-ok':'badge-zero');
+}
+
+async function salvarVenda(id) {
+  const dataBR = dateToDataBR(currentDate);
+  const btn = document.querySelector(`#venda-${id} .save-btn-v`);
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Salvando...';
+  try {
+    await api('/salvar-venda', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({
+      team:       TEAM_ID,
+      aba:        vendedorAtual.crmTab,
+      data: dataBR,
+      cliente:    document.getElementById(`vcli-${id}`)?.value.trim()||'',
+      email:      document.getElementById(`vmail-${id}`)?.value.trim()||'',
+      linkClint:  document.getElementById(`vlink-${id}`)?.value.trim()||'',
+      evento:     document.getElementById(`vevt-${id}`)?.value||'',
+      categoria:  document.getElementById(`vcat-${id}`)?.value||'',
+      headcounts: parseInt(document.getElementById(`vhc-${id}`)?.value)||1,
+      obs:        document.getElementById(`vobs-${id}`)?.value.trim()||'',
+    })});
+    document.getElementById(`venda-${id}`).classList.add('saved');
+    document.getElementById(`vdot-${id}`).classList.remove('unsaved');
+    showToast('Venda registrada!','toast-venda');
+    toggleVenda(id);
+  } catch(e) { showToast('Erro: '+e.message,'toast-erro'); }
+  btn.disabled = false; btn.textContent = 'Salvar venda';
+}
+
+// ══════════════════════════════════════════════════════
+// ADMIN
+// ══════════════════════════════════════════════════════
+function overlayClickOutside(e) {
+  // Fecha admin se clicar no backdrop escuro (fora do panel)
+  if (e.target === document.getElementById('admin-overlay')) fecharAdmin();
+}
+
+function abrirAdmin() {
+  const ov = document.getElementById('admin-overlay');
+  ov.classList.add('show');
+  if (adminSenha) {
+    showCtx();
+  } else {
+    // Garante que a tela de senha está visível
+    document.getElementById('senha-screen').style.display = '';
+    document.getElementById('ctx-screen').classList.add('hidden');
+    document.getElementById('admin-team-panel').classList.add('hidden');
+    document.getElementById('admin-global-panel').classList.add('hidden');
+  }
+}
+function fecharAdmin() { document.getElementById('admin-overlay').classList.remove('show'); }
+
+async function verificarSenha() {
+  const pwd = document.getElementById('senha-input').value;
+  const errEl = document.getElementById('senha-erro');
+  errEl.style.display = 'none';
+  try {
+    const r = await api('/admin/verificar', { method:'POST', headers:{'Content-Type':'application/json','x-admin-password':pwd}, body:JSON.stringify({password:pwd}) });
+    if (r.ok) { adminSenha = pwd; sessionStorage.setItem('rd_admin', pwd); showCtx(); }
+    else { errEl.style.display = 'block'; errEl.textContent = 'Senha incorreta.'; }
+  } catch(e) { errEl.style.display = 'block'; errEl.textContent = `Erro de conexão: ${e.message}`; }
+}
+
+async function showCtx() {
+  document.getElementById('senha-screen').style.display = 'none';
+  document.getElementById('ctx-screen').classList.remove('hidden');
+  document.getElementById('admin-team-panel').classList.add('hidden');
+  document.getElementById('admin-global-panel').classList.add('hidden');
+
+  const list = document.getElementById('ctx-list');
+  list.innerHTML = '<div class="loading-v">Carregando times...</div>';
+  try {
+    const teams = await api('/api/teams');
+    list.innerHTML = teams.map(t=>`
+      <button class="ctx-card" onclick="enterCtx('${t.id}')">
+        <div class="ctx-card-dot" style="background:${t.color}"></div>
+        <div style="flex:1"><div class="ctx-card-name">${t.teamName}</div><div class="ctx-card-sub">${t.name}</div></div>
+        <span style="font-size:11px;color:var(--text3)">→</span>
+      </button>`).join('')
+    + `<button class="ctx-card" style="border-style:dashed;margin-top:4px" onclick="enterCtx('global')">
+        <span style="font-size:16px">🌐</span>
+        <div style="flex:1"><div class="ctx-card-name">Admin Geral</div><div class="ctx-card-sub">Times e imersões</div></div>
+      </button>`;
+  } catch(e) {
+    list.innerHTML = `<div style="color:var(--red);font-size:13px;padding:12px">Erro ao carregar times: ${e.message}<br><br><button onclick="showCtx()" style="background:var(--tc);color:#fff;border:none;border-radius:8px;padding:8px 16px;cursor:pointer;font-family:inherit;font-size:12px">Tentar novamente</button></div>`;
+  }
+}
+
+async function enterCtx(ctx) {
+  adminCtx = ctx;
+  document.getElementById('ctx-screen').classList.add('hidden');
+  if (ctx === 'global') {
+    document.getElementById('admin-global-panel').classList.remove('hidden');
+    renderGlobalTabs();
+  } else {
+    document.getElementById('admin-team-panel').classList.remove('hidden');
+    renderTeamTabs();
+  }
+}
+
+// ── TEAM PANEL ────────────────────────────────────────
+const TEAM_TABS_DEF = [
+  {id:'st-vd', label:'Status + Vendas'},
+  {id:'vendors', label:'Vendedores'},
+  {id:'grupos', label:'Grupos'},
+];
+let teamTab = 'st-vd';
+
+function renderTeamTabs() {
+  const tabs = document.getElementById('team-tabs');
+  tabs.innerHTML = TEAM_TABS_DEF.map((t,i)=>
+    `<button class="admin-tab ${i===0?'active':''}" onclick="setTeamTab('${t.id}',this)">${t.label}</button>`
+  ).join('');
+  setTeamTab('st-vd', tabs.querySelector('.admin-tab'));
+}
+
+async function setTeamTab(tab, el) {
+  teamTab = tab;
+  document.querySelectorAll('#team-tabs .admin-tab').forEach(b=>b.classList.remove('active'));
+  if(el) el.classList.add('active');
+  const body = document.getElementById('team-panel-body');
+  body.innerHTML = '<div class="loading-v">Carregando...</div>';
+  if (tab==='st-vd') await renderStatusVendas(body);
+  else if (tab==='vendors') await renderVendors(body);
+  else if (tab==='grupos') await renderGrupos(body);
+}
+
+async function renderStatusVendas(body) {
+  body.innerHTML = `
+    <div class="admin-box">
+      <div class="admin-box-title">Status do time — quem preencheu?</div>
+      <div style="display:flex;gap:8px;margin-bottom:12px;align-items:flex-end">
+        <div style="flex:1"><label style="font-size:10px;color:var(--text3);font-weight:700;display:block;margin-bottom:4px">DATA</label>
+        <input type="date" id="status-data" value="${todayISO()}" style="width:100%;border:1.5px solid var(--border);border-radius:8px;padding:9px 11px;font-size:13px;color:var(--text);background:var(--bg3);outline:none"></div>
+        <button class="admin-add-btn" style="flex-shrink:0;width:auto;padding:10px 16px" onclick="carregarStatusEVendas()">Verificar</button>
+      </div>
+      <div id="status-loading" style="display:none;text-align:center;padding:1rem;color:var(--text3);font-size:13px">Verificando...</div>
+      <div id="status-lista"></div>
+    </div>
+    <div class="admin-box">
+      <div class="admin-box-title" style="display:flex;align-items:center;justify-content:space-between">
+        <span>Vendas do time no dia</span>
+        <span id="vendas-total-geral" style="display:none;font-size:12px;font-weight:700;color:#fff;background:var(--green);padding:2px 10px;border-radius:100px"></span>
+      </div>
+      <div id="vendas-time-loading" style="display:none;text-align:center;padding:1rem;color:var(--text3);font-size:13px">Carregando vendas...</div>
+      <div id="vendas-time-lista"></div>
+    </div>`;
+}
+
+async function carregarStatusEVendas() {
+  const dateEl = document.getElementById('status-data');
+  if (!dateEl?.value) { showToast('Selecione uma data','toast-erro'); return; }
+  const [a,m,d] = dateEl.value.split('-');
+  const dataBR = `${d}/${m}/${a}`;
+
+  document.getElementById('status-loading').style.display='block';
+  document.getElementById('status-lista').innerHTML='';
+  document.getElementById('vendas-time-loading').style.display='block';
+  document.getElementById('vendas-time-lista').innerHTML='';
+  document.getElementById('vendas-total-geral').style.display='none';
+
+  const h = { 'x-admin-password': adminSenha };
+  const [sRes, vRes] = await Promise.all([
+    api(`/status-time?team=${adminCtx}&data=${encodeURIComponent(dataBR)}`, {headers:h}).catch(e=>({erro:e.message})),
+    api(`/vendas-time?team=${adminCtx}&data=${encodeURIComponent(dataBR)}`, {headers:h}).catch(e=>({erro:e.message})),
+  ]);
+
+  // Status
+  document.getElementById('status-loading').style.display='none';
+  const lista = document.getElementById('status-lista');
+  if (sRes.erro) { lista.innerHTML=`<div class="status-vazio" style="padding:8px">Erro: ${sRes.erro}</div>`; }
+  else {
+    const ativos = (sRes.resultados||[]).filter(v=>!vendedores.find(vv=>vv.code===v.codigo&&vv.exitDate));
+    ativos.forEach(v => {
+      const row = document.createElement('div'); row.className='status-row';
+      if (v.erro) {
+        row.innerHTML=`<div class="status-dot dot-no"></div><div class="status-nome">${v.nome}</div><span class="status-vazio">Erro ao verificar</span>`;
+      } else if (!v.preencheu) {
+        row.innerHTML=`<div class="status-dot dot-no"></div><div class="status-nome">${v.nome}</div><span class="status-vazio">Não preencheu</span>`;
+      } else {
+        const horasOk = v.horas && v.horas!=='0' && v.horas!=='0:00:00' && v.horas!=='—';
+        row.innerHTML=`
+          <div class="status-dot ${horasOk?'dot-ok':'dot-parcial'}"></div>
+          <div class="status-nome">${v.nome}</div>
+          <div class="status-dados">
+            <span class="status-dado destaque">${v.horas||'—'}</span>
+            <span class="status-dado">Atend: ${v.atend||'0'}</span>
+            <span class="status-dado">Entrv: ${v.entrv||'0'}</span>
+            <span class="status-dado">Head: ${v.head||'0'}</span>
+          </div>`;
+      }
+      lista.appendChild(row);
+    });
+  }
+
+  // Vendas
+  document.getElementById('vendas-time-loading').style.display='none';
+  const vLista = document.getElementById('vendas-time-lista');
+  if (vRes.erro) { vLista.innerHTML=`<div class="status-vazio" style="padding:8px">Erro: ${vRes.erro}</div>`; return; }
+  const total = vRes.totalGeral||0;
+  const tot = document.getElementById('vendas-total-geral');
+  tot.textContent = `${total} venda${total!==1?'s':''}`;
+  tot.style.display = 'inline-block';
+  (vRes.resultados||[]).forEach((v,idx) => {
+    const block = document.createElement('div'); block.className='vendas-vend-row';
+    const chevId=`chev-${idx}`, bodyId=`vbody-${idx}`;
+    block.innerHTML=`
+      <div class="vendas-vend-header" onclick="toggleVendasRow('${bodyId}','${chevId}')">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="vendas-vend-nome">${v.nome}</span>
+          <span class="vendas-vend-count ${v.totalVendas>0?'vcount-ok':'vcount-zero'}">${v.totalVendas} venda${v.totalVendas!==1?'s':''}</span>
+        </div>
+        <span class="vendas-vend-chevron" id="${chevId}">▾</span>
+      </div>
+      <div class="vendas-vend-body" id="${bodyId}">
+        ${v.totalVendas===0
+          ? '<div class="vendas-vend-empty">Nenhuma venda registrada neste dia.</div>'
+          : v.vendas.map(vd=>`
+            <div class="venda-detalhe">
+              <div class="venda-detalhe-top">
+                <span class="venda-detalhe-nome">${vd.cliente||'Sem nome'}</span>
+                ${vd.categoria?`<span class="venda-detalhe-cat">${vd.categoria}</span>`:''}
+              </div>
+              <div class="venda-detalhe-rows">
+                ${vd.evento?`<span class="venda-detalhe-tag">📍 ${vd.evento}</span>`:''}
+                ${vd.headcounts?`<span class="venda-detalhe-tag">👥 ${vd.headcounts} HC</span>`:''}
+                ${vd.email?`<span class="venda-detalhe-tag">✉ ${vd.email}</span>`:''}
+              </div>
+              ${vd.obs?`<div class="venda-detalhe-obs">${vd.obs}</div>`:''}
+            </div>`).join('')}
+      </div>`;
+    vLista.appendChild(block);
+  });
+}
+
+function toggleVendasRow(bId, cId) {
+  const b=document.getElementById(bId), c=document.getElementById(cId);
+  const open=b.classList.toggle('open');
+  if(c) c.classList.toggle('open', open);
+}
+
+async function renderVendors(body) {
+  const tId = adminCtx;
+  const tvs = await api(`/vendedores?team=${tId}`).catch(()=>[]);
+  const active = tvs.filter(v=>!v.exitDate);
+  const exited = tvs.filter(v=>!!v.exitDate);
+  body.innerHTML = `
+    <div class="admin-box">
+      <div class="admin-box-title">Ativos (${active.length})</div>
+      ${active.map(v=>`
+        <div class="vend-row">
+          <div><div class="vend-nome">${v.name}${v.isSupervisor?' 👑':''}${v.hasRec?' <span style="font-size:10px;background:rgba(232,119,34,.15);color:#E87722;padding:1px 6px;border-radius:100px;font-weight:700">REC</span>':''}</div><div class="vend-aba">${v.code} · ${isoToBR(v.startDate)}</div></div>
+          <div class="vli-actions" style="display:flex;gap:6px">
+            <button class="edit-btn" onclick="fillVendorForm('${tId}','${v.code}')">Editar</button>
+            <button class="vend-remove" onclick="delVendor('${tId}','${v.code}')">×</button>
+          </div>
+        </div>`).join('')}
+      ${exited.length?`<details style="margin-top:10px"><summary style="font-size:11px;color:var(--text3);cursor:pointer">👋 Desligados (${exited.length})</summary>
+        ${exited.map(v=>`<div class="vend-row" style="opacity:.6"><div><div class="vend-nome">${v.name}</div><div class="vend-aba">${v.code} · saiu ${isoToBR(v.exitDate)}</div></div></div>`).join('')}
+      </details>`:''}
+    </div>
+    <div class="admin-box">
+      <div class="admin-box-title">Adicionar / Editar Vendedor</div>
+      <input type="text" id="vf-code" placeholder="Código (ex: V823)">
+      <input type="text" id="vf-name" placeholder="Nome completo">
+      <input type="text" id="vf-tab" placeholder="Nome exato da aba no CRM">
+      <label style="font-size:10px;color:var(--text3);font-weight:700;text-transform:uppercase;display:block;margin-bottom:4px">Data de entrada</label>
+      <input type="date" id="vf-start">
+      <label style="font-size:10px;color:var(--text3);font-weight:700;text-transform:uppercase;display:block;margin-bottom:4px">Data de saída (se desligado)</label>
+      <input type="date" id="vf-exit">
+      <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:8px">
+        <div style="display:flex;align-items:center;gap:8px">
+          <input type="checkbox" id="vf-sup" style="width:auto;accent-color:var(--tc)">
+          <label for="vf-sup" style="font-size:13px;color:var(--text2);cursor:pointer">É supervisor</label>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <input type="checkbox" id="vf-rec" style="width:auto;accent-color:#E87722">
+          <label for="vf-rec" style="font-size:13px;color:var(--text2);cursor:pointer">Apto para <strong style="color:#E87722">Recuperação (REC)</strong></label>
+        </div>
+      </div>
+      <button class="admin-add-btn" onclick="saveVendor('${tId}')">Salvar Vendedor</button>
+      <div id="vf-msg" style="font-size:12px;margin-top:6px;min-height:18px"></div>
+    </div>`;
+}
+
+async function fillVendorForm(tId, code) {
+  const tvs = await api(`/vendedores?team=${tId}`).catch(()=>[]);
+  const v = tvs.find(x => x.code === code);
+  if (!v) return;
+  document.getElementById('vf-code').value   = v.code;
+  document.getElementById('vf-name').value   = v.name;
+  document.getElementById('vf-tab').value    = v.crmTab || '';
+  document.getElementById('vf-start').value  = v.startDate || '';
+  document.getElementById('vf-exit').value   = v.exitDate  || '';
+  document.getElementById('vf-sup').checked  = v.isSupervisor || false;
+  document.getElementById('vf-rec').checked  = v.hasRec || false;
+  document.getElementById('vf-code').scrollIntoView({ behavior: 'smooth' });
+}
+
+async function saveVendor(tId) {
+  const msg = document.getElementById('vf-msg');
+  msg.style.color='var(--amber)'; msg.textContent='Salvando...';
+  try {
+    const r = await api(`/admin/supervisor/${tId}/vendor`, { method:'POST', headers:ah(), body:JSON.stringify({
+      code: document.getElementById('vf-code').value.trim().toUpperCase(),
+      name: document.getElementById('vf-name').value.trim(),
+      crmTab: document.getElementById('vf-tab').value.trim(),
+      isSupervisor: document.getElementById('vf-sup').checked,
+      hasRec:       document.getElementById('vf-rec').checked,
+      startDate: document.getElementById('vf-start').value||null,
+      exitDate: document.getElementById('vf-exit').value||null,
+    })});
+    msg.style.color='var(--green)'; msg.textContent = r.savedToGitHub?'✓ Salvo e publicado!':'✓ Salvo';
+    vendedores = (await api(`/vendedores?team=${TEAM_ID}`)).filter(v=>!v.exitDate);
+    setTimeout(()=>renderVendors(document.getElementById('team-panel-body')),500);
+  } catch(e) { msg.style.color='var(--red)'; msg.textContent='Erro: '+e.message; }
+}
+
+async function delVendor(tId, code) {
+  if (!confirm(`Remover ${code}?`)) return;
+  await api(`/admin/supervisor/${tId}/vendor/${code}`, {method:'DELETE',headers:ah()});
+  vendedores = (await api(`/vendedores?team=${TEAM_ID}`)).filter(v=>!v.exitDate);
+  renderVendors(document.getElementById('team-panel-body'));
+}
+
+async function renderGrupos(body) {
+  const tId = adminCtx;
+  const [gs, tvs, cfg] = await Promise.all([
+    api(`/api/grupos?team=${tId}`).catch(()=>[]),
+    api(`/vendedores?team=${tId}`).catch(()=>[]),
+    api('/api/config').catch(()=>({immersions:[]})),
+  ]);
+  const allImm = cfg.immersions||[];
+  body.innerHTML = `
+    <div class="admin-box">
+      <div class="admin-box-title">Grupos (${gs.length})</div>
+      ${gs.length===0?'<div style="font-size:13px;color:var(--text3)">Nenhum grupo ainda.</div>':gs.map(g=>`
+        <div class="vend-row">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="width:10px;height:10px;border-radius:50%;background:${g.color||'var(--tc)'}"></div>
+            <div><div class="vend-nome">${g.name}</div><div class="vend-aba">${g.members?.length||0} membros · Meta HC: ${g.hcGoal} (${g.hcPerVendor||0}/pessoa)${g.periodoInicio?` · ${isoToBR(g.periodoInicio)} → ${isoToBR(g.periodoFim)}`:' · Período não definido'}</div></div>
+          </div>
+          <div style="display:flex;gap:6px">
+            <button class="edit-btn" onclick="fillGrupo('${tId}','${g.id}')">Editar</button>
+            <button class="vend-remove" onclick="delGrupo('${tId}','${g.id}')">×</button>
+          </div>
+        </div>`).join('')}
+    </div>
+    <div class="admin-box">
+      <div class="admin-box-title">Criar / Editar Grupo</div>
+      <input type="hidden" id="gf-id">
+      <div style="display:grid;grid-template-columns:1fr auto;gap:8px;margin-bottom:8px">
+        <input type="text" id="gf-name" placeholder="Nome do grupo" style="margin:0">
+        <input type="color" id="gf-color" value="#4c9fff" style="width:42px;height:42px;padding:3px;cursor:pointer;border:1.5px solid var(--border);border-radius:9px;margin:0">
+      </div>
+      <input type="number" id="gf-hc" placeholder="Meta de HC total do grupo" min="0">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+        <div>
+          <label style="font-size:10px;color:var(--text3);font-weight:700;text-transform:uppercase;display:block;margin-bottom:4px">Início do período</label>
+          <input type="date" id="gf-inicio" style="margin:0">
+        </div>
+        <div>
+          <label style="font-size:10px;color:var(--text3);font-weight:700;text-transform:uppercase;display:block;margin-bottom:4px">Fim do período</label>
+          <input type="date" id="gf-fim" style="margin:0">
+        </div>
+      </div>
+      <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;margin-bottom:6px">Vendedores</div>
+      <div style="background:var(--bg3);border:1.5px solid var(--border);border-radius:9px;padding:10px;max-height:160px;overflow-y:auto;display:flex;flex-direction:column;gap:7px;margin-bottom:8px">
+        ${tvs.filter(v=>!v.exitDate).map(v=>`
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;color:var(--text)">
+            <input type="checkbox" class="gf-v" value="${v.code}" style="width:auto;accent-color:var(--tc)">
+            ${v.name} <span style="font-size:10px;color:var(--text3)">${v.code}</span>
+          </label>`).join('')}
+      </div>
+      <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;margin-bottom:6px">Imersões atribuídas</div>
+      <div style="background:var(--bg3);border:1.5px solid var(--border);border-radius:9px;padding:10px;max-height:120px;overflow-y:auto;display:flex;flex-direction:column;gap:7px;margin-bottom:8px">
+        ${allImm.length===0?'<span style="font-size:12px;color:var(--text3)">Nenhuma imersão cadastrada.</span>':allImm.map(im=>`
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;color:var(--text)">
+            <input type="checkbox" class="gf-i" value="${im.id}" style="width:auto;accent-color:var(--tc)">
+            ${im.name} <span style="font-size:10px;color:var(--text3)">${isoToBR(im.startDate)}</span>
+          </label>`).join('')}
+      </div>
+      <button class="admin-add-btn" onclick="saveGrupo('${tId}')">Salvar Grupo</button>
+      <div id="gf-msg" style="font-size:12px;margin-top:6px;min-height:18px"></div>
+    </div>`;
+}
+
+async function fillGrupo(tId, groupId) {
+  const gs = await api(`/api/grupos?team=${tId}`).catch(()=>[]);
+  const g = gs.find(x=>x.id===groupId); if (!g) return;
+  document.getElementById('gf-id').value    = g.id;
+  document.getElementById('gf-name').value  = g.name;
+  document.getElementById('gf-color').value = g.color||'#4c9fff';
+  document.getElementById('gf-hc').value    = g.hcGoal||0;
+  document.getElementById('gf-inicio').value = g.periodoInicio||'';
+  document.getElementById('gf-fim').value    = g.periodoFim||'';
+  document.querySelectorAll('.gf-v').forEach(cb=>{ cb.checked=(g.vendorCodes||[]).includes(cb.value); });
+  document.querySelectorAll('.gf-i').forEach(cb=>{ cb.checked=(g.immersionIds||[]).includes(cb.value); });
+  document.getElementById('gf-name').scrollIntoView({behavior:'smooth'});
+}
+
+async function saveGrupo(tId) {
+  const msg = document.getElementById('gf-msg');
+  msg.style.color='var(--amber)'; msg.textContent='Salvando...';
+  const gId = document.getElementById('gf-id').value;
+  try {
+    const r = await api(`/admin/supervisor/${tId}/grupo`, { method:'POST', headers:ah(), body:JSON.stringify({
+      ...(gId && {id:gId}),
+      name:         document.getElementById('gf-name').value.trim(),
+      color:        document.getElementById('gf-color').value,
+      hcGoal:       parseInt(document.getElementById('gf-hc').value)||0,
+      periodoInicio: document.getElementById('gf-inicio').value||null,
+      periodoFim:    document.getElementById('gf-fim').value||null,
+      vendorCodes:  [...document.querySelectorAll('.gf-v:checked')].map(c=>c.value),
+      immersionIds: [...document.querySelectorAll('.gf-i:checked')].map(c=>c.value),
+    })});
+    msg.style.color='var(--green)'; msg.textContent=r.savedToGitHub?'✓ Salvo e publicado!':'✓ Salvo';
+    document.getElementById('gf-id').value='';
+    grupos = await api(`/api/grupos?team=${TEAM_ID}`).catch(()=>[]);
+    setTimeout(()=>renderGrupos(document.getElementById('team-panel-body')),500);
+  } catch(e) { msg.style.color='var(--red)'; msg.textContent='Erro: '+e.message; }
+}
+
+async function delGrupo(tId, groupId) {
+  if (!confirm('Remover este grupo?')) return;
+  await api(`/admin/supervisor/${tId}/grupo/${groupId}`, {method:'DELETE',headers:ah()});
+  grupos = await api(`/api/grupos?team=${TEAM_ID}`).catch(()=>[]);
+  renderGrupos(document.getElementById('team-panel-body'));
+}
+
+// ── GLOBAL PANEL ──────────────────────────────────────
+function voltarParaTimes() { window.location.href = window.location.pathname; }
+
+const GLOBAL_TABS_DEF = [
+  {id:'times',    label:'Times'},
+  {id:'imersoes', label:'Imersões'},
+];
+
+function renderGlobalTabs() {
+  const tabs = document.getElementById('global-tabs');
+  tabs.innerHTML = GLOBAL_TABS_DEF.map((t,i)=>
+    `<button class="admin-tab ${i===0?'active':''}" onclick="setGlobalTab('${t.id}',this)">${t.label}</button>`
+  ).join('');
+  setGlobalTab('times', tabs.querySelector('.admin-tab'));
+}
+
+async function setGlobalTab(tab, el) {
+  document.querySelectorAll('#global-tabs .admin-tab').forEach(b=>b.classList.remove('active'));
+  if(el) el.classList.add('active');
+  const body = document.getElementById('global-panel-body');
+  body.innerHTML='<div class="loading-v">Carregando...</div>';
+  if (tab==='times') await renderTimes(body);
+  else if (tab==='imersoes') await renderImersoes(body);
+  else if (tab==='periodo-meta') await renderPeriodoMeta(body);
+}
+
+async function renderTimes(body) {
+  const teams = await api('/api/teams').catch(()=>[]);
+  body.innerHTML = `
+    <div class="setup-box">
+      <strong>⚠️ Ao cadastrar novo time:</strong><br>
+      1. Compartilhe a planilha como Editor com:<br>
+      <code>registro-diario@registro-diario-495519.iam.gserviceaccount.com</code><br>
+      2. Remova proteções: <code>Dados → Planilhas protegidas → remover</code>
+    </div>
+    <div class="admin-box">
+      <div class="admin-box-title">Times cadastrados</div>
+      ${teams.map(t=>`
+        <div class="vend-row">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="width:10px;height:10px;border-radius:50%;background:${t.color}"></div>
+            <div><div class="vend-nome">${t.teamName}</div><div class="vend-aba">${t.name} · <a href="?team=${t.id}" target="_blank" style="color:var(--tc)">?team=${t.id}</a></div></div>
+          </div>
+          <button class="vend-remove" onclick="delTeam('${t.id}','${t.teamName}')">Remover</button>
+        </div>`).join('')}
+    </div>
+    <div class="admin-box">
+      <div class="admin-box-title">Adicionar / Editar Time</div>
+      <input type="text" id="t-id" placeholder="ID único (ex: eagles)">
+      <input type="text" id="t-name" placeholder="Nome do supervisor">
+      <input type="text" id="t-tname" placeholder="Nome do time (ex: Eagles)">
+      <input type="text" id="t-crm" placeholder="ID ou URL da planilha CRM">
+      <input type="text" id="t-sup" placeholder="Código do supervisor (ex: V737)">
+      <input type="color" id="t-color" value="#22d471" style="width:100%;height:42px;cursor:pointer;padding:4px;border:1.5px solid var(--border);border-radius:9px;margin-bottom:8px">
+      <button class="admin-add-btn" onclick="saveTime()">Salvar Time</button>
+      <div id="t-msg" style="font-size:12px;margin-top:6px;min-height:18px"></div>
+    </div>`;
+}
+
+async function saveTime() {
+  const msg = document.getElementById('t-msg');
+  msg.style.color='var(--amber)'; msg.textContent='Salvando...';
+  try {
+    const r = await api('/admin/supervisor', { method:'POST', headers:ah(), body:JSON.stringify({
+      id: document.getElementById('t-id').value.trim().toLowerCase().replace(/\s+/g,'-'),
+      name: document.getElementById('t-name').value.trim(),
+      teamName: document.getElementById('t-tname').value.trim(),
+      crmUrl: document.getElementById('t-crm').value.trim(),
+      supervisorCode: document.getElementById('t-sup').value.trim().toUpperCase(),
+      color: document.getElementById('t-color').value,
+    })});
+    msg.style.color='var(--green)'; msg.textContent=r.savedToGitHub?'✓ Salvo e publicado!':'✓ Salvo';
+    setTimeout(()=>renderTimes(document.getElementById('global-panel-body')),500);
+  } catch(e) { msg.style.color='var(--red)'; msg.textContent='Erro: '+e.message; }
+}
+
+async function delTeam(id, name) {
+  if (!confirm(`Remover o time "${name}"?`)) return;
+  await api(`/admin/supervisor/${id}`, {method:'DELETE',headers:ah()});
+  renderTimes(document.getElementById('global-panel-body'));
+}
+
+async function renderImersoes(body) {
+  const cfg = await api('/api/config').catch(()=>({immersions:[]}));
+  const imm = cfg.immersions||[];
+  body.innerHTML = `
+    <div class="admin-box">
+      <div class="admin-box-title">Imersões cadastradas (${imm.length})</div>
+      ${imm.length===0?'<div style="font-size:13px;color:var(--text3)">Nenhuma imersão.</div>':imm.map(im=>`
+        <div class="vend-row">
+          <div>
+            <div class="vend-nome">${im.name}</div>
+            <div class="vend-aba">${isoToBR(im.startDate)} · ${im.location||'—'} · <strong style="color:${dayColor(im.daysUntil)}">${dayLabel(im.daysUntil)}</strong></div>
+          </div>
+          <button class="vend-remove" onclick="delImm('${im.id}','${im.name}')">Remover</button>
+        </div>`).join('')}
+    </div>
+    <div class="admin-box">
+      <div class="admin-box-title">Adicionar Imersão</div>
+      <input type="text" id="im-name" placeholder="Nome (ex: IMLS SÃO PAULO)">
+      <input type="date" id="im-start">
+      <input type="text" id="im-loc" placeholder="Local (ex: São Paulo, SP)">
+      <button class="admin-add-btn" onclick="saveImm()">Adicionar Imersão</button>
+      <div id="im-msg" style="font-size:12px;margin-top:6px;min-height:18px"></div>
+    </div>`;
+}
+
+async function saveImm() {
+  const msg = document.getElementById('im-msg');
+  msg.style.color='var(--amber)'; msg.textContent='Salvando...';
+  try {
+    const r = await api('/admin/immersion', { method:'POST', headers:ah(), body:JSON.stringify({
+      name: document.getElementById('im-name').value.trim(),
+      startDate: document.getElementById('im-start').value,
+      location: document.getElementById('im-loc').value.trim(),
+    })});
+    msg.style.color='var(--green)'; msg.textContent=r.savedToGitHub?'✓ Salva e publicada!':'✓ Salva';
+    const cfg = await api('/api/config'); immersions = cfg.immersions||[];
+    setTimeout(()=>renderImersoes(document.getElementById('global-panel-body')),500);
+  } catch(e) { msg.style.color='var(--red)'; msg.textContent='Erro: '+e.message; }
+}
+
+async function delImm(id, name) {
+  if (!confirm(`Remover "${name}"?`)) return;
+  await api(`/admin/immersion/${id}`, {method:'DELETE',headers:ah()});
+  const cfg = await api('/api/config'); immersions = cfg.immersions||[];
+  renderImersoes(document.getElementById('global-panel-body'));
+}
+
+async function renderPeriodoMeta(body) {
+  const cfg = await api('/api/config').catch(()=>({meta:{}}));
+  const pi = cfg.meta?.periodoInicio || monthStartISO();
+  const pf = cfg.meta?.periodoFim    || todayISO();
+  body.innerHTML = `
+    <div class="admin-box">
+      <div class="admin-box-title">Período de meta (usado nos grupos)</div>
+      <p style="font-size:12px;color:var(--text3);margin-bottom:12px;line-height:1.55">Define o intervalo de datas que será usado para calcular o progresso de HC dos grupos na tela inicial.</p>
+      <label style="font-size:10px;color:var(--text3);font-weight:700;text-transform:uppercase;display:block;margin-bottom:4px">Início do período</label>
+      <input type="date" id="mp-inicio" value="${pi}">
+      <label style="font-size:10px;color:var(--text3);font-weight:700;text-transform:uppercase;display:block;margin-bottom:4px">Fim do período</label>
+      <input type="date" id="mp-fim" value="${pf}">
+      <button class="admin-add-btn" onclick="savePeriodoMeta()">Salvar Período</button>
+      <div id="mp-msg" style="font-size:12px;margin-top:6px;min-height:18px"></div>
+    </div>`;
+}
+
+async function savePeriodoMeta() {
+  const msg = document.getElementById('mp-msg');
+  msg.style.color='var(--amber)'; msg.textContent='Salvando...';
+  const pi = document.getElementById('mp-inicio').value;
+  const pf = document.getElementById('mp-fim').value;
+  if (!pi||!pf) { msg.style.color='var(--red)'; msg.textContent='Preencha as duas datas.'; return; }
+  try {
+    const r = await api('/admin/config', { method:'POST', headers:ah(), body:JSON.stringify({ periodoInicio:pi, periodoFim:pf }) });
+    metaPeriod = { inicio:pi, fim:pf };
+    msg.style.color='var(--green)'; msg.textContent=r.savedToGitHub?'✓ Salvo e publicado!':'✓ Salvo';
+  } catch(e) { msg.style.color='var(--red)'; msg.textContent='Erro: '+e.message; }
+}
+
+// ══════════════════════════════════════════════════════
+// BOOT
+// ══════════════════════════════════════════════════════
+init();
+</script>
+</body>
+</html>
