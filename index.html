@@ -627,6 +627,7 @@ input[type=date]::-webkit-calendar-picker-indicator{filter:invert(.5)}
 
 <div class="toast" id="toast"></div>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
 <script>
 // ══════════════════════════════════════════════════════
 // CONFIG
@@ -1421,9 +1422,17 @@ function panoramaVendedor(entradas) {
   return { dHf, dLig, dCon, evoluiu, desde: primeira.hora };
 }
 
+let microCharts = {}; // code -> Chart.js instance
+
+function destruirMicroCharts() {
+  Object.values(microCharts).forEach(c => c.destroy());
+  microCharts = {};
+}
+
 function renderMicroList() {
   const wrap = document.getElementById('micro-list');
   const ativos = vendedores;
+  destruirMicroCharts();
   if (!ativos.length) { wrap.innerHTML = '<div class="loading-v">Sem vendedores ativos.</div>'; return; }
 
   wrap.innerHTML = ativos.map(v => {
@@ -1445,11 +1454,68 @@ function renderMicroList() {
           <div style="font-size:11px;color:var(--text3)">${entradas.length} conferência${entradas.length!==1?'s':''}${ultima?` · última às ${ultima.hora}`:''}</div>
           ${pan ? `<div style="font-size:11px;margin-top:4px;color:${pan.evoluiu?'var(--green3)':'var(--amber)'}">${pan.evoluiu?'📈':'⏸'} desde ${pan.desde}: +${pan.dLig} lig · +${hmsDeSegundos(pan.dHf)} HF · +${hmsDeSegundos(pan.dCon)} conectado</div>` : ''}
         </div>
-        <button class="edit-btn" style="flex-shrink:0" onclick="abrirMicroModal('${v.code}')">+ Agora</button>
+        <div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0">
+          <button class="edit-btn" onclick="abrirMicroModal('${v.code}')">+ Agora</button>
+          <button class="edit-btn" ${!ultima?'disabled style="opacity:.4"':''} onclick="copiarAtualizacaoMicro('${v.code}')">📋 Copiar</button>
+        </div>
       </div>
+      ${entradas.length >= 2 ? `<div style="padding:4px 14px 8px;height:130px"><canvas id="chart-${v.code}"></canvas></div>` : ''}
       ${entradas.length ? `<div style="padding:0 14px 10px">${linhas}</div>` : ''}
     </div>`;
   }).join('');
+
+  renderMicroCharts();
+}
+
+function renderMicroCharts() {
+  if (typeof Chart === 'undefined') return; // CDN indisponível — não quebra o resto da tela
+  const style   = getComputedStyle(document.body);
+  const corLig  = style.getPropertyValue('--purple2').trim() || '#7F77DD';
+  const corHf   = style.getPropertyValue('--green').trim()   || '#1D9E75';
+  const corGrid = style.getPropertyValue('--border').trim()  || '#e5e3f5';
+  const corTxt  = style.getPropertyValue('--text3').trim()   || '#aaa';
+
+  vendedores.forEach(v => {
+    const entradas = microData[v.code] || [];
+    if (entradas.length < 2) return;
+    const canvas = document.getElementById(`chart-${v.code}`);
+    if (!canvas) return;
+    microCharts[v.code] = new Chart(canvas.getContext('2d'), {
+      type: 'line',
+      data: {
+        labels: entradas.map(e => e.hora.slice(0,5)),
+        datasets: [
+          { label:'Ligações', data: entradas.map(e=>e.ligacoes), borderColor: corLig, backgroundColor: corLig, yAxisID:'y', tension:.3, pointRadius:3 },
+          { label:'HF (min)', data: entradas.map(e=>Math.round(e.hf/60)), borderColor: corHf, backgroundColor: corHf, yAxisID:'y1', tension:.3, pointRadius:3 },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { labels: { color: corTxt, font: { size: 10 }, boxWidth: 10 } } },
+        scales: {
+          x:  { ticks: { color: corTxt, font: { size: 9 } }, grid: { color: corGrid } },
+          y:  { position:'left',  beginAtZero:true, ticks:{ color: corLig, font:{ size:9 } }, grid:{ color: corGrid } },
+          y1: { position:'right', beginAtZero:true, ticks:{ color: corHf,  font:{ size:9 } }, grid:{ display:false } },
+        },
+      },
+    });
+  });
+}
+
+function copiarAtualizacaoMicro(code) {
+  const entradas = microData[code] || [];
+  const ultima = entradas[entradas.length - 1];
+  if (!ultima) { showToast('Sem conferência registrada ainda','toast-erro'); return; }
+  const texto = `✅Atualização\n${hmsDeSegundos(ultima.hf)} horas faladas\n${ultima.ligacoes} ligações`;
+  const feito = () => showToast('Copiado! Pode colar no zap','toast-metrica');
+  navigator.clipboard.writeText(texto).then(feito).catch(() => {
+    const ta = document.createElement('textarea');
+    ta.value = texto; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select();
+    document.execCommand('copy'); ta.remove();
+    feito();
+  });
 }
 
 function horaAgoraHMS() {
