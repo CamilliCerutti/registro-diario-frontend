@@ -1515,11 +1515,18 @@ function renderMicroList() {
   }).join('');
 }
 
+// Ex: 3675s -> "01h01min" (sempre 2 dígitos em hora e minuto)
+function hhmmCurto(s) {
+  s = s || 0;
+  const h = Math.floor(s/3600), m = Math.floor((s%3600)/60);
+  return `${String(h).padStart(2,'0')}h${String(m).padStart(2,'0')}min`;
+}
+
 function copiarAtualizacaoMicro(code) {
   const entradas = microData[code] || [];
   const ultima = entradas[entradas.length - 1];
   if (!ultima) { showToast('Sem conferência registrada ainda','toast-erro'); return; }
-  const texto = `✅Atualização\n${tempoAbsoluto(ultima.hf)} horas faladas\n${ultima.ligacoes} ligações`;
+  const texto = `✅Atualização\n${tempoAbsoluto(ultima.hf)} horas faladas\n${ultima.ligacoes} ligações\n${hhmmCurto(ultima.conectado)} conectado`;
   const feito = () => showToast('Copiado! Pode colar no zap','toast-metrica');
   navigator.clipboard.writeText(texto).then(feito).catch(() => {
     const ta = document.createElement('textarea');
